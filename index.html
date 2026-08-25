@@ -1,523 +1,240 @@
 <!DOCTYPE html>
-<html lang="th" class="dark">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Pulse — ศูนย์รวมสรุปข่าว AI ประจำวัน</title>
+  <title>AI Today — สรุปข่าว AI ภาษาคน เข้าใจง่าย</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
-          },
-          fontFamily: { sans: ['Prompt', 'Inter', 'sans-serif'] }
-        }
-      }
-    }
-  </script>
+  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Prompt', 'Inter', sans-serif; }
-    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
-    .dark .glass-card { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 999px; }
+    body {
+      font-family: 'Prompt', 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white pb-16">
 
-  <header class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 glass-card">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
-          <i class="fa-solid fa-brain text-xl"></i>
-        </div>
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-xl sticky top-0 z-30">
+    <div class="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="text-2xl">⚡</span>
         <div>
-          <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            AI Pulse <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Live</span>
-          </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">ศูนย์รวมสรุปข่าวและความเคลื่อนไหว AI ประจำวัน</p>
+          <h1 class="text-base font-bold tracking-tight text-white leading-tight">AI Today</h1>
+          <p class="text-[11px] text-slate-400">สรุปข่าว AI สั้น กระชับ ภาษาคน</p>
         </div>
       </div>
-
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button onclick="fetchLiveNews()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all text-sm" title="รีเฟรชข่าวล่าสุด">
-          <i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i>
-        </button>
-        <button id="bookmarkFilterBtn" onclick="toggleBookmarkView()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all text-sm flex items-center gap-1.5" title="ดูข่าวที่บันทึกไว้">
-          <i class="fa-regular fa-bookmark"></i>
-          <span class="hidden sm:inline text-xs font-medium">บุ๊กมาร์ก (<span id="bookmarkCount">0</span>)</span>
-        </button>
-        <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all" title="สลับโหมดมืด/สว่าง">
-          <i id="themeIcon" class="fa-solid fa-moon"></i>
-        </button>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        25 ส.ค. 2026
       </div>
     </div>
   </header>
 
-  <!-- Audio Floating Bar -->
-  <div id="audioPlayerBar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl p-3 sm:p-4 rounded-2xl bg-slate-900/95 dark:bg-slate-800/95 text-white shadow-2xl border border-slate-700 backdrop-blur-xl flex items-center justify-between gap-3">
-    <div class="flex items-center gap-3 overflow-hidden">
-      <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0 animate-pulse">
-        <i class="fa-solid fa-volume-high"></i>
-      </div>
-      <div class="truncate">
-        <p id="audioStatusText" class="text-xs text-indigo-300 font-medium">กำลังอ่านเสียงภาษาไทย...</p>
-        <p id="audioNewsTitle" class="text-sm font-semibold truncate">หัวข้อข่าว</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <button onclick="pauseResumeSpeech()" id="playPauseBtn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-        <i id="playPauseIcon" class="fa-solid fa-pause text-xs"></i>
-      </button>
-      <button onclick="stopSpeech()" class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 flex items-center justify-center transition">
-        <i class="fa-solid fa-stop text-xs"></i>
-      </button>
-    </div>
-  </div>
+  <!-- Main Feed -->
+  <main class="max-w-2xl mx-auto px-5 pt-6 sm:pt-8">
 
-  <!-- Main Content -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full">
-    <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-xl shadow-indigo-500/15 relative overflow-hidden">
-      <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
-      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-medium mb-3">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            อัปเดตล่าสุด: <span id="currentDateDisplay" class="font-semibold">25 สิงหาคม 2026</span>
+    <!-- 30-Second Summary Box -->
+    <div class="mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-indigo-950/60 to-purple-950/40 border border-indigo-500/20 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">⏱️</span>
+        <h2 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">สรุปด่วนใน 30 วินาที</h2>
+      </div>
+      <ul class="space-y-2 text-sm text-slate-200 leading-relaxed font-light">
+        <li class="flex items-start gap-2">
+          <span class="text-indigo-400 mt-0.5">•</span>
+          <span><strong>เซิร์ฟเวอร์ AI เร็วขึ้น 2 เท่า:</strong> โปรแกรมรุ่นใหม่เปิดเครื่องได้ไวขึ้น ประหยัดค่าเช่าเครื่อง</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-indigo-400 mt-0.5">•</span>
+          <span><strong>AI สร้างเกมตามสั่ง:</strong> แค่พิมพ์บอก AI ก็สร้างมินิเกมและหน้าเว็บให้เล่นได้เลย</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-indigo-400 mt-0.5">•</span>
+          <span><strong>ชาร์ตเพลงแบน AI:</strong> ออสเตรเลียสั่งห้ามเพลงที่สร้างจาก AI ทั้งหมดติดชาร์ตเพลง</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Section Title -->
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>📰 ข่าวเด่นวันนี้</span>
+        <span class="text-xs font-normal text-slate-400">(5 เรื่องน่ารู้)</span>
+      </h3>
+    </div>
+
+    <!-- Cards List -->
+    <div class="space-y-6" id="newsFeed">
+
+      <!-- Card 1 -->
+      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
+            ⚡ ความเร็ว & ชิป
+          </span>
+          <span class="text-xs text-slate-400">ค่าย: Ray & SGLang</span>
+        </div>
+
+        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
+          ระบบรัน AI เร็วขึ้นกว่า 2 เท่า สั่งเปิดใช้งานไม่ต้องรอนาน
+        </h4>
+
+        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">📌</span>
+            <p><strong class="text-white font-medium">เรื่องคือ:</strong> โปรแกรมที่ใช้รัน AI มีการอัปเดตระบบจัดคิวความจำใหม่ ทำให้เวลาเปิดเครื่องเซิร์ฟเวอร์รันโมเดลขนาดใหญ่ ลดเวลาจาก 85 วินาที เหลือแค่ 36 วินาที</p>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">สรุปข่าวและโมเดล AI เด่นรอบวัน</h2>
-          <p class="text-indigo-100 text-sm mt-1">คัดเฉพาะประเด็นสำคัญ เทคโนโลยีใหม่ และผลกระทบต่อธุรกิจ อ่านและฟังจบใน 3 นาที</p>
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">💡</span>
+            <p><strong class="text-white font-medium">ดียังไง:</strong> ระบบตอบสนองไวขึ้น ธุรกิจประหยัดค่าเช่าเครื่องเซิร์ฟเวอร์ลงอย่างมาก</p>
+          </div>
         </div>
-        <div class="flex items-center gap-3">
-          <button onclick="readAllNews()" class="px-4 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-semibold text-sm shadow-md transition flex items-center gap-2">
-            <i class="fa-solid fa-play"></i> ฟังเสียงสรุปทั้งหมด (ภาษาไทย)
-          </button>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <a href="https://buttondown.com/ai-tldr/archive/aitldr-daily-digest-august-24-2026/" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            อ่านต้นฉบับเต็ม →
+          </a>
         </div>
-      </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+            🎮 แอป & เกม
+          </span>
+          <span class="text-xs text-slate-400">ค่าย: Meta & xAI</span>
+        </div>
+
+        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
+          ไม่ต้องเขียนโค้ดเป็น แค่พิมพ์สั่ง AI ก็สร้างมินิเกมและเว็บให้เล่นได้ทันที
+        </h4>
+
+        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">📌</span>
+            <p><strong class="text-white font-medium">เรื่องคือ:</strong> Meta เปิดตัวแอปชื่อ Pocket ให้คนทั่วไปพิมพ์ข้อความสั่งสร้างเกมสั้นๆ ไปเล่นกับเพื่อนบนโซเชียลได้ ส่วน Grok ของ Elon Musk ก็เปิดให้ทุกคนสร้างหน้าเว็บได้ง่ายๆ</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">💡</span>
+            <p><strong class="text-white font-medium">ดียังไง:</strong> จากเดิมที่ AI ทำได้แค่แต่งรูปหรือตอบแชต ตอนนี้กลายเป็นเครื่องมือสร้างโปรแกรมเล็กๆ ให้คนทั่วไปใช้งานได้จริง</p>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            อ่านต้นฉบับเต็ม →
+          </a>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/20">
+            🔒 ความปลอดภัย
+          </span>
+          <span class="text-xs text-slate-400">ค่าย: Anthropic (Claude)</span>
+        </div>
+
+        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
+          ส่ง AI ไปเป็น "รปภ. ไซเบอร์" ช่วยหาจุดรั่วไหลของโปรแกรมก่อนโดนแฮก
+        </h4>
+
+        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">📌</span>
+            <p><strong class="text-white font-medium">เรื่องคือ:</strong> Anthropic เปิดให้บริษัทใหญ่ใช้โมเดลตัวเก่ง ช่วยสแกนหาช่องโหว่ความปลอดภัยของระบบ พร้อมแจกทุนสนับสนุนนักพัฒนาโปรแกรมฟรีเพื่อความปลอดภัย</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">💡</span>
+            <p><strong class="text-white font-medium">ดียังไง:</strong> ป้องกันระบบบริษัทและข้อมูลของผู้ใช้งานไม่ให้โดนแฮกเกอร์โจมตี</p>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            อ่านต้นฉบับเต็ม →
+          </a>
+        </div>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            🔬 งานวิจัย
+          </span>
+          <span class="text-xs text-slate-400">หัวข้อ: ความฉลาดของ AI</span>
+        </div>
+
+        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
+          ผลทดสอบชี้ชัด: AI วันนี้ยังไม่สามารถ "ฉลาดขึ้นเอง" โดยไม่ต้องมีคนช่วย
+        </h4>
+
+        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">📌</span>
+            <p><strong class="text-white font-medium">เรื่องคือ:</strong> นักวิจัยจัดทดสอบว่า AI จะสามารถเขียนและปรับปรุงอัลกอริทึมของตัวเองให้ฉลาดขึ้นได้ไหม ปรากฏว่ายังทำคะแนนได้ต่ำมาก</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">💡</span>
+            <p><strong class="text-white font-medium">ดียังไง:</strong> คลายความกังวลว่า AI จะพัฒนาตัวเองจนหลุดการควบคุม มนุษย์ยังคงเป็นหัวใจหลักในการสร้างและควบคุม AI เสมอ</p>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            อ่านต้นฉบับเต็ม →
+          </a>
+        </div>
+      </article>
+
+      <!-- Card 5 -->
+      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            🎵 วงการเพลง
+          </span>
+          <span class="text-xs text-slate-400">ประเทศ: ออสเตรเลีย</span>
+        </div>
+
+        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
+          ชาร์ตเพลงใหญ่ในออสเตรเลีย สั่งแบนเพลงที่แต่งโดย AI 100%
+        </h4>
+
+        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">📌</span>
+            <p><strong class="text-white font-medium">เรื่องคือ:</strong> ชาร์ตเพลงหลักของออสเตรเลียประกาศกฎเด็ดขาด เพลงที่จะมีสิทธิ์ติดชาร์ตยอดนิยมได้ ต้องมีมนุษย์เป็นคนแต่งและร้องเป็นหลักเท่านั้น</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="text-base">💡</span>
+            <p><strong class="text-white font-medium">ดียังไง:</strong> เพื่อปกป้องผลงานและรายได้ของศิลปินตัวจริง ไม่ให้โดนเพลง AI สร้างขึ้นมาแย่งพื้นที่</p>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <a href="https://www.straitstimes.com/asia/australianz/australias-top-music-charts-ban-ai-songs" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            อ่านต้นฉบับเต็ม →
+          </a>
+        </div>
+      </article>
+
     </div>
 
-    <!-- Category & Search -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" id="categoryContainer">
-        <button onclick="filterCategory('all')" class="cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-indigo-600 text-white">ทั้งหมด</button>
-        <button onclick="filterCategory('โมเดลใหม่ & อัปเกรด')" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">โมเดลใหม่ & อัปเกรด</button>
-        <button onclick="filterCategory('โครงสร้างพื้นฐาน & ชิป')" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">โครงสร้างพื้นฐาน & ชิป</button>
-        <button onclick="filterCategory('กฎหมาย & ความปลอดภัย')" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">กฎหมาย & ความปลอดภัย</button>
-        <button onclick="filterCategory('ธุรกิจ & วิจัย')" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">ธุรกิจ & วิจัย</button>
-      </div>
-
-      <div class="relative w-full md:w-72">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาข่าว หรือคีย์เวิร์ด..." 
-          class="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-      </div>
-    </div>
-
-    <!-- News Grid -->
-    <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-2xl">
-        <i class="fa-regular fa-folder-open"></i>
-      </div>
-      <h3 class="text-base font-semibold text-slate-700 dark:text-slate-300">ไม่พบข่าวที่ค้นหา</h3>
-      <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะครับ</p>
-    </div>
   </main>
 
-  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 py-6">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-      <p>© 2026 AI Pulse — ขับเคลื่อนและอัปเดตข้อมูลอัตโนมัติด้วย AI Assistant</p>
-      <div class="flex items-center gap-4">
-        <span class="text-emerald-500 font-medium">● เชื่อมต่อ Live Database</span>
-        <span>•</span>
-        <span>Web Speech Thai</span>
-      </div>
-    </div>
+  <footer class="mt-12 text-center text-xs text-slate-500">
+    <p>AI Today • สรุปข่าว AI สดใหม่ทุกวัน</p>
   </footer>
 
-  <script>
-    const SPREADSHEET_ID = '1l4JjYvBros8t8UaVxTpmeMou4WsiwoOJmcvkX_BW0u8';
-    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-
-    let newsData = [
-      {
-        id: 1,
-        date: "25 สิงหาคม 2026",
-        category: "โครงสร้างพื้นฐาน & ชิป",
-        title: "Ray 2.58.0 และ SGLang ยกระดับระบบรันโมเดลภาษา ลดเวลา Cold Start 2.38 เท่า",
-        summary: "Ray 2.58.0 เปิดตัวระบบ KV-Cache-Aware Routing ส่งคำขอไปยังเซิร์ฟเวอร์ที่มีแคชเดิมอยู่แล้วโดยตรง ลดการประมวลผลซ้ำซ้อน ขณะที่ SGLang v0.5.18 ช่วยลดเวลาเริ่มระบบของโมเดลขนาดใหญ่บน H100 จาก 85 วินาที เหลือเพียง 36 วินาที",
-        impact: "ช่วยให้องค์กรลดต้นทุนค่าประมวลผลโมเดลโอเพนซอร์ส และทำให้ระบบตอบสนองได้เร็วขึ้นอย่างมาก",
-        sourceTitle: "AI/TLDR Daily Digest",
-        sourceUrl: "https://buttondown.com/ai-tldr/archive/aitldr-daily-digest-august-24-2026/",
-        speechText: "เรื่องแรก โครงสร้างพื้นฐานประมวลผลโมเดลภาษาพัฒนาครั้งใหญ่ครับ โดย Ray เวอร์ชันใหม่เพิ่มระบบ Cache Routing ช่วยตัดการประมวลผลซ้ำซ้อน และ SGLang ช่วยลดเวลาเริ่มระบบโมเดลใหม่ลงกว่าสองจุดสามเท่า ช่วยประหยัดค่าใช้จ่ายได้มากครับ"
-      },
-      {
-        id: 2,
-        date: "25 สิงหาคม 2026",
-        category: "โมเดลใหม่ & อัปเกรด",
-        title: "Meta ปล่อยแอป Pocket และ xAI ขยาย Grok Build ให้ผู้ใช้สร้างมินิเกมและแอปได้เอง",
-        summary: "Meta เปิดตัว Pocket ในสหรัฐฯ ให้ผู้ใช้สั่งสร้างเกม Interactive ผ่านข้อความ (Text-to-Game) บนฟีดโซเชียล ขณะที่ xAI ขยาย Grok Build สู่ผู้ใช้ทั่วไป สามารถสร้างเว็บ แดชบอร์ด และส่งออกโค้ดไปยัง GitHub ได้ทันที",
-        impact: "Generative AI ขยายตัวจากการสร้างแค่ข้อความและรูปภาพ ไปสู่การสร้างชิ้นส่วนซอฟต์แวร์ที่ใช้งานได้จริง",
-        sourceTitle: "AI News by Kaiyu",
-        sourceUrl: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en",
-        speechText: "เรื่องที่สอง เอไอขยายตัวสู่การสร้างแอปและมินิเกมครับ โดย Meta เปิดตัวแอป Pocket ให้สร้างเกมผ่านข้อความ และ xAI เปิดให้ผู้ใช้ทั่วไปสร้างเว็บและแดชบอร์ดพร้อมส่งออกโค้ดได้ทันทีครับ"
-      },
-      {
-        id: 3,
-        date: "25 สิงหาคม 2026",
-        category: "กฎหมาย & ความปลอดภัย",
-        title: "Anthropic เปิดใช้งาน Claude Mythos 5 สแกนหาช่องโหว่ความปลอดภัยระดับองค์กร",
-        summary: "Anthropic เปิดให้ลูกค้าระดับองค์กรใช้งาน Claude Mythos 5 ในการสแกนหาช่องโหว่ความปลอดภัยเชิงป้องกัน พร้อมจัดสรรงบ 35 ล้านดอลลาร์ในโครงการ Defender Advantage Fund เพื่อสนับสนุนความปลอดภัยโอเพนซอร์ส",
-        impact: "นำโมเดลขั้นสูงมาใช้ตรวจจับและอุดช่องโหว่ระบบ ก่อนถูกผู้ไม่หวังดีนำไปใช้โจมตี",
-        sourceTitle: "AI News by Kaiyu",
-        sourceUrl: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en",
-        speechText: "เรื่องที่สาม แอนโทรปิก เปิดตัว คลอด ไมธอส ไฟว์ สำหรับตรวจสอบช่องโหว่ความปลอดภัยเชิงป้องกันระดับองค์กร พร้อมมอบงบสามสิบห้าล้านดอลลาร์สนับสนุนความปลอดภัยของซอฟต์แวร์โอเพนซอร์สครับ"
-      },
-      {
-        id: 4,
-        date: "25 สิงหาคม 2026",
-        category: "ธุรกิจ & วิจัย",
-        title: "เบนช์มาร์ก AI4AI-Bench เผย AI ปัจจุบันยังห่างไกลจากการพัฒนาอัลกอริทึมของตัวเอง",
-        summary: "งานวิจัยใหม่ทดสอบว่า AI สามารถแก้ไขและพัฒนาอัลกอริทึมการเรียนรู้ของระบบตนเองได้จริงหรือไม่ ผลทดสอบโมเดลชั้นนำได้คะแนนเฉลี่ยเพียง 0.166 ชี้ว่าการพัฒนาความฉลาดของอัลกอริทึมด้วยตัวเองยังต้องใช้เวลาอีกมาก",
-        impact: "สะท้อนความเป็นจริงว่า AI ยังต้องการมนุษย์ในการออกแบบโครงสร้างหลัก และยังไม่สามารถพัฒนาตนเองแบบก้าวกระโดดได้ในปัจจุบัน",
-        sourceTitle: "AI4AI Research Evaluation",
-        sourceUrl: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en",
-        speechText: "เรื่องที่สี่ มีการเปิดตัวเบนช์มาร์กใหม่เพื่อวัดว่าเอไอสามารถพัฒนาอัลกอริทึมของตัวเองได้หรือไม่ ซึ่งผลทดสอบชี้ว่าเอไอในปัจจุบันยังห่างไกลจากการพัฒนาตนเองแบบอัตโนมัติครับ"
-      },
-      {
-        id: 5,
-        date: "25 สิงหาคม 2026",
-        category: "กฎหมาย & ความปลอดภัย",
-        title: "ชาร์ตเพลงออสเตรเลียสั่งแบนเพลง AI แท้ 100% บังคับต้องมีมนุษย์เป็นผู้สร้างสรรค์หลัก",
-        summary: "ARIA ชาร์ตเพลงหลักของออสเตรเลียประกาศกฎใหม่ ห้ามเพลงที่สร้างจาก AI ล้วนเข้าจัดอันดับในชาร์ตเพลงอย่างเป็นทางการ เพื่อปกป้องศิลปิน ขณะที่คดีฟ้องร้องการนำข้อมูลสตรีมเมอร์ไปเทรนโมเดลเริ่มขยายวงกว้าง",
-        impact: "เป็นหมุดหมายสำคัญของการจัดระเบียบลิขสิทธิ์ผลงานสร้างสรรค์ในอุตสาหกรรมบันเทิงระดับโลก",
-        sourceTitle: "The Straits Times",
-        sourceUrl: "https://www.straitstimes.com/asia/australianz/australias-top-music-charts-ban-ai-songs",
-        speechText: "เรื่องสุดท้าย ชาร์ตเพลงใหญ่ในออสเตรเลียออกกฎห้ามเพลงที่สร้างจากเอไอทั้งหมดเข้าชาร์ต โดยต้องมีมนุษย์เป็นผู้สร้างสรรค์หลักเท่านั้น เพื่อปกป้องสิทธิ์ของศิลปินครับ"
-      }
-    ];
-
-    let currentCategory = 'all';
-    let searchQuery = '';
-    let isBookmarkOnly = false;
-    let bookmarks = JSON.parse(localStorage.getItem('ai_news_bookmarks') || '[]');
-
-    // Audio Engine
-    let availableVoices = [];
-    let thaiVoice = null;
-    let audioQueue = [];
-    let audioQueueIndex = 0;
-    let keepAliveInterval = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-      updateBookmarkCount();
-      renderNews();
-      initTheme();
-      initSpeechEngine();
-      fetchLiveNews();
-    });
-
-    function initSpeechEngine() {
-      if (!('speechSynthesis' in window)) return;
-      function updateVoiceList() {
-        availableVoices = window.speechSynthesis.getVoices();
-        thaiVoice = availableVoices.find(v => 
-          v.lang === 'th-TH' || 
-          v.lang.toLowerCase().startsWith('th') || 
-          v.name.toLowerCase().includes('thai') || 
-          v.name.includes('ไทย')
-        ) || null;
-      }
-      updateVoiceList();
-      window.speechSynthesis.onvoiceschanged = updateVoiceList;
-    }
-
-    function readSingleNews(id) {
-      const item = newsData.find(n => n.id === id);
-      if (!item) return;
-      stopSpeech();
-      audioQueue = [{ title: item.title, text: item.speechText }];
-      audioQueueIndex = 0;
-      playCurrentQueueItem();
-    }
-
-    function readAllNews() {
-      stopSpeech();
-      audioQueue = newsData.map((item, idx) => ({
-        title: `ข่าวที่ ${idx + 1}: ${item.title}`,
-        text: item.speechText
-      }));
-      audioQueueIndex = 0;
-      playCurrentQueueItem();
-    }
-
-    function playCurrentQueueItem() {
-      if (!('speechSynthesis' in window)) {
-        alert('ขออภัย เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง');
-        return;
-      }
-      if (audioQueueIndex >= audioQueue.length) {
-        stopSpeech();
-        return;
-      }
-
-      const current = audioQueue[audioQueueIndex];
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(current.text);
-      utterance.lang = 'th-TH'; // บังคับภาษาไทย
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      if (!thaiVoice) initSpeechEngine();
-      if (thaiVoice) utterance.voice = thaiVoice;
-
-      document.getElementById('audioNewsTitle').innerText = current.title;
-      document.getElementById('audioStatusText').innerText = `กำลังอ่าน (${audioQueueIndex + 1}/${audioQueue.length})`;
-      document.getElementById('audioPlayerBar').classList.remove('hidden');
-      document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
-
-      clearInterval(keepAliveInterval);
-      keepAliveInterval = setInterval(() => {
-        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }
-      }, 10000);
-
-      utterance.onend = () => {
-        audioQueueIndex++;
-        if (audioQueueIndex < audioQueue.length) {
-          setTimeout(playCurrentQueueItem, 400);
-        } else {
-          stopSpeech();
-        }
-      };
-
-      utterance.onerror = () => {
-        audioQueueIndex++;
-        if (audioQueueIndex < audioQueue.length) {
-          setTimeout(playCurrentQueueItem, 400);
-        } else {
-          stopSpeech();
-        }
-      };
-
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function pauseResumeSpeech() {
-      if (!('speechSynthesis' in window)) return;
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-        document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
-      } else if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.pause();
-        document.getElementById('playPauseIcon').className = 'fa-solid fa-play text-xs';
-      }
-    }
-
-    function stopSpeech() {
-      clearInterval(keepAliveInterval);
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      document.getElementById('audioPlayerBar').classList.add('hidden');
-      audioQueue = [];
-      audioQueueIndex = 0;
-    }
-
-    async function fetchLiveNews() {
-      const refreshIcon = document.getElementById('refreshIcon');
-      refreshIcon.classList.add('animate-spin');
-      try {
-        const response = await fetch(GVIZ_URL);
-        const text = await response.text();
-        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-        if (jsonMatch && jsonMatch) {
-          const data = JSON.parse(jsonMatch);
-          const rows = data.table.rows;
-          if (rows && rows.length > 0) {
-            const parsed = rows.map((r, index) => {
-              const c = r.c;
-              return {
-                id: c[0] ? c[0].v : (index + 1),
-                date: c ? c.v : '',
-                category: c ? c.v : 'ทั่วไป',
-                title: c[3] ? c[3].v : '',
-                summary: c[4] ? c[4].v : '',
-                impact: c[5] ? c[5].v : '',
-                sourceTitle: c[6] ? c[6].v : 'แหล่งข่าว',
-                sourceUrl: c[7] ? c[7].v : '#',
-                speechText: c[8] ? c[8].v : (c[3] ? c[3].v : '')
-              };
-            }).filter(item => item.title && item.title !== 'Title');
-            if (parsed.length > 0) {
-              newsData = parsed;
-              renderNews();
-              document.getElementById('currentDateDisplay').innerText = newsData[0].date || 'อัปเดตล่าสุด';
-            }
-          }
-        }
-      } catch (err) {
-        console.log('Using local news cache:', err);
-      } finally {
-        setTimeout(() => { refreshIcon.classList.remove('animate-spin'); }, 600);
-      }
-    }
-
-    function getBadgeColor(cat) {
-      if (cat.includes('โมเดล')) return 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
-      if (cat.includes('โครงสร้าง')) return 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
-      if (cat.includes('กฎหมาย') || cat.includes('ปลอดภัย')) return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
-      if (cat.includes('ธุรกิจ') || cat.includes('วิจัย')) return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
-      return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
-    }
-
-    function renderNews() {
-      const grid = document.getElementById('newsGrid');
-      const empty = document.getElementById('emptyState');
-      grid.innerHTML = '';
-
-      const filtered = newsData.filter(item => {
-        const matchCategory = (currentCategory === 'all') || (item.category.includes(currentCategory));
-        const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            item.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            item.category.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchBookmark = !isBookmarkOnly || bookmarks.includes(item.id);
-        return matchCategory && matchSearch && matchBookmark;
-      });
-
-      if (filtered.length === 0) {
-        empty.classList.remove('hidden');
-      } else {
-        empty.classList.add('hidden');
-        filtered.forEach(item => {
-          const isSaved = bookmarks.includes(item.id);
-          const badgeStyle = getBadgeColor(item.category);
-          const card = document.createElement('article');
-          card.className = "rounded-2xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group";
-          
-          card.innerHTML = `
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-3">
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-lg border ${badgeStyle}">
-                  ${item.category}
-                </span>
-                <div class="flex items-center gap-1">
-                  <button onclick="readSingleNews(${item.id})" class="p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="ฟังเสียงอ่านข่าวนี้">
-                    <i class="fa-solid fa-volume-high text-xs"></i>
-                  </button>
-                  <button onclick="toggleBookmark(${item.id})" class="p-2 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="บันทึกข่าว">
-                    <i class="${isSaved ? 'fa-solid text-amber-500' : 'fa-regular'} fa-bookmark text-xs"></i>
-                  </button>
-                </div>
-              </div>
-
-              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                ${item.title}
-              </h3>
-              
-              <p class="text-sm text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed">
-                ${item.summary}
-              </p>
-
-              <div class="mt-3.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
-                <strong class="text-slate-700 dark:text-slate-200 font-semibold"><i class="fa-solid fa-bolt text-indigo-500 mr-1"></i> ผลกระทบสำคัญ:</strong> ${item.impact}
-              </div>
-            </div>
-
-            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-              <span class="text-slate-400"><i class="fa-regular fa-clock mr-1"></i> ${item.date}</span>
-              <a href="${item.sourceUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-                แหล่งข่าว (${item.sourceTitle}) <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-              </a>
-            </div>
-          `;
-          grid.appendChild(card);
-        });
-      }
-    }
-
-    function filterCategory(cat) {
-      currentCategory = cat;
-      isBookmarkOnly = false;
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.className = "cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700";
-      });
-      event.currentTarget.className = "cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-indigo-600 text-white";
-      updateBookmarkBtnState();
-      renderNews();
-    }
-
-    function handleSearch() {
-      searchQuery = document.getElementById('searchInput').value;
-      renderNews();
-    }
-
-    function toggleBookmark(id) {
-      if (bookmarks.includes(id)) {
-        bookmarks = bookmarks.filter(b => b !== id);
-      } else {
-        bookmarks.push(id);
-      }
-      localStorage.setItem('ai_news_bookmarks', JSON.stringify(bookmarks));
-      updateBookmarkCount();
-      renderNews();
-    }
-
-    function toggleBookmarkView() {
-      isBookmarkOnly = !isBookmarkOnly;
-      updateBookmarkBtnState();
-      renderNews();
-    }
-
-    function updateBookmarkCount() {
-      document.getElementById('bookmarkCount').innerText = bookmarks.length;
-    }
-
-    function updateBookmarkBtnState() {
-      const btn = document.getElementById('bookmarkFilterBtn');
-      if (isBookmarkOnly) {
-        btn.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
-        btn.classList.remove('text-slate-600', 'dark:text-slate-300');
-      } else {
-        btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
-        btn.classList.add('text-slate-600', 'dark:text-slate-300');
-      }
-    }
-
-    function initTheme() {
-      if (localStorage.theme === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.getElementById('themeIcon').className = 'fa-solid fa-sun';
-      } else {
-        document.documentElement.classList.add('dark');
-        document.getElementById('themeIcon').className = 'fa-solid fa-moon';
-      }
-    }
-
-    function toggleDarkMode() {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark');
-        localStorage.theme = 'light';
-        document.getElementById('themeIcon').className = 'fa-solid fa-sun';
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.theme = 'dark';
-        document.getElementById('themeIcon').className = 'fa-solid fa-moon';
-      }
-    }
-  </script>
 </body>
 </html>
