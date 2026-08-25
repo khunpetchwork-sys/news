@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Today — สรุปข่าว AI ภาษาคน เข้าใจง่าย</title>
+  <title>Daily Pulse — สรุปข่าว AI & ตลาดหุ้น เข้าใจง่าย</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Prompt & Inter -->
@@ -13,228 +13,231 @@
   <style>
     body {
       font-family: 'Prompt', 'Inter', sans-serif;
-      background-color: #0f172a;
+      background-color: #0b0f19;
       color: #f8fafc;
     }
   </style>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white pb-16">
+<body class="min-h-screen bg-[#0b0f19] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white pb-16">
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-xl sticky top-0 z-30">
+  <header class="border-b border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-xl sticky top-0 z-30">
     <div class="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <span class="text-2xl">⚡</span>
         <div>
-          <h1 class="text-base font-bold tracking-tight text-white leading-tight">AI Today</h1>
-          <p class="text-[11px] text-slate-400">สรุปข่าว AI สั้น กระชับ ภาษาคน</p>
+          <h1 class="text-base font-bold tracking-tight text-white leading-tight">Daily Pulse</h1>
+          <p class="text-[11px] text-slate-400">สรุปข่าว AI & พอร์ตหุ้น ภาษาคน</p>
         </div>
       </div>
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        25 ส.ค. 2026
+      <div class="flex items-center gap-2">
+        <button onclick="fetchLiveNews()" class="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs flex items-center gap-1.5" title="รีเฟรชข้อมูลล่าสุด">
+          <span id="refreshSpinner" class="inline-block">🔄</span>
+          <span class="text-[11px] font-medium hidden sm:inline">อัปเดตสด</span>
+        </button>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          25 ส.ค. 2026
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Feed -->
+  <!-- Main Container -->
   <main class="max-w-2xl mx-auto px-5 pt-6 sm:pt-8">
 
-    <!-- 30-Second Summary Box -->
-    <div class="mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-indigo-950/60 to-purple-950/40 border border-indigo-500/20 shadow-lg">
+    <!-- Tab Selector (สลับดู ข่าว AI หรือ พอร์ตหุ้น) -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
+      <button id="tabAi" onclick="switchTab('ai')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+        <span>🤖 ข่าว AI ประจำวัน</span>
+      </button>
+      <button id="tabStock" onclick="switchTab('stock')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50">
+        <span>📈 ตลาดหุ้น & พอร์ต</span>
+      </button>
+    </div>
+
+    <!-- AI 30-Second Summary Box -->
+    <div id="aiSummaryBox" class="mb-6 p-5 rounded-3xl bg-gradient-to-br from-indigo-950/60 to-purple-950/40 border border-indigo-500/20 shadow-lg">
       <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">⏱️</span>
-        <h2 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">สรุปด่วนใน 30 วินาที</h2>
+        <span class="text-base">⏱️</span>
+        <h2 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">สรุปด่วน AI วันนี้ (30 วินาที)</h2>
       </div>
-      <ul class="space-y-2 text-sm text-slate-200 leading-relaxed font-light">
+      <ul class="space-y-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
         <li class="flex items-start gap-2">
-          <span class="text-indigo-400 mt-0.5">•</span>
-          <span><strong>เซิร์ฟเวอร์ AI เร็วขึ้น 2 เท่า:</strong> โปรแกรมรุ่นใหม่เปิดเครื่องได้ไวขึ้น ประหยัดค่าเช่าเครื่อง</span>
+          <span class="text-indigo-400">•</span>
+          <span><strong>ระบบรัน AI เร็วขึ้น 2 เท่า:</strong> โปรแกรมรุ่นใหม่เปิดเครื่องได้ไวขึ้น ประหยัดค่าเช่าเครื่อง</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="text-indigo-400 mt-0.5">•</span>
+          <span class="text-indigo-400">•</span>
           <span><strong>AI สร้างเกมตามสั่ง:</strong> แค่พิมพ์บอก AI ก็สร้างมินิเกมและหน้าเว็บให้เล่นได้เลย</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="text-indigo-400 mt-0.5">•</span>
+          <span class="text-indigo-400">•</span>
           <span><strong>ชาร์ตเพลงแบน AI:</strong> ออสเตรเลียสั่งห้ามเพลงที่สร้างจาก AI ทั้งหมดติดชาร์ตเพลง</span>
         </li>
       </ul>
     </div>
 
-    <!-- Section Title -->
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="text-base font-bold text-white flex items-center gap-2">
-        <span>📰 ข่าวเด่นวันนี้</span>
-        <span class="text-xs font-normal text-slate-400">(5 เรื่องน่ารู้)</span>
-      </h3>
+    <!-- Stock Summary Box -->
+    <div id="stockSummaryBox" class="hidden mb-6 p-5 rounded-3xl bg-gradient-to-br from-emerald-950/60 to-teal-950/40 border border-emerald-500/20 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-base">📊</span>
+        <h2 class="text-xs font-bold text-emerald-300 uppercase tracking-wider">สรุปภาพรวม 4 สินทรัพย์ในพอร์ต</h2>
+      </div>
+      <ul class="space-y-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-400">•</span>
+          <span><strong>S&P 500 (SCBS&P500):</strong> หุ้นสหรัฐฯ ทรงตัวรอตัวเลขเศรษฐกิจ ภาพรวมระยะยาวยังแข็งแกร่ง</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-400">•</span>
+          <span><strong>MSCI World (SCBWORLD):</strong> หุ้นโลกเคลื่อนไหวตามตลาดหลัก เน้นการกระจายความเสี่ยง</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-400">•</span>
+          <span><strong>China Tech (SCBCTECH) & Gold (SCBGOLD):</strong> เทคจีนเริ่มฟื้นตัวตามกระแส AI / ทองคำโลกทรงตัวสูง</span>
+        </li>
+      </ul>
     </div>
 
-    <!-- Cards List -->
-    <div class="space-y-6" id="newsFeed">
-
-      <!-- Card 1 -->
-      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
-            ⚡ ความเร็ว & ชิป
-          </span>
-          <span class="text-xs text-slate-400">ค่าย: Ray & SGLang</span>
-        </div>
-
-        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
-          ระบบรัน AI เร็วขึ้นกว่า 2 เท่า สั่งเปิดใช้งานไม่ต้องรอนาน
-        </h4>
-
-        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">📌</span>
-            <p><strong class="text-white font-medium">เรื่องคือ:</strong> โปรแกรมที่ใช้รัน AI มีการอัปเดตระบบจัดคิวความจำใหม่ ทำให้เวลาเปิดเครื่องเซิร์ฟเวอร์รันโมเดลขนาดใหญ่ ลดเวลาจาก 85 วินาที เหลือแค่ 36 วินาที</p>
-          </div>
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">💡</span>
-            <p><strong class="text-white font-medium">ดียังไง:</strong> ระบบตอบสนองไวขึ้น ธุรกิจประหยัดค่าเช่าเครื่องเซิร์ฟเวอร์ลงอย่างมาก</p>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex justify-end">
-          <a href="https://buttondown.com/ai-tldr/archive/aitldr-daily-digest-august-24-2026/" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            อ่านต้นฉบับเต็ม →
-          </a>
-        </div>
-      </article>
-
-      <!-- Card 2 -->
-      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
-            🎮 แอป & เกม
-          </span>
-          <span class="text-xs text-slate-400">ค่าย: Meta & xAI</span>
-        </div>
-
-        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
-          ไม่ต้องเขียนโค้ดเป็น แค่พิมพ์สั่ง AI ก็สร้างมินิเกมและเว็บให้เล่นได้ทันที
-        </h4>
-
-        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">📌</span>
-            <p><strong class="text-white font-medium">เรื่องคือ:</strong> Meta เปิดตัวแอปชื่อ Pocket ให้คนทั่วไปพิมพ์ข้อความสั่งสร้างเกมสั้นๆ ไปเล่นกับเพื่อนบนโซเชียลได้ ส่วน Grok ของ Elon Musk ก็เปิดให้ทุกคนสร้างหน้าเว็บได้ง่ายๆ</p>
-          </div>
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">💡</span>
-            <p><strong class="text-white font-medium">ดียังไง:</strong> จากเดิมที่ AI ทำได้แค่แต่งรูปหรือตอบแชต ตอนนี้กลายเป็นเครื่องมือสร้างโปรแกรมเล็กๆ ให้คนทั่วไปใช้งานได้จริง</p>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex justify-end">
-          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            อ่านต้นฉบับเต็ม →
-          </a>
-        </div>
-      </article>
-
-      <!-- Card 3 -->
-      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/20">
-            🔒 ความปลอดภัย
-          </span>
-          <span class="text-xs text-slate-400">ค่าย: Anthropic (Claude)</span>
-        </div>
-
-        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
-          ส่ง AI ไปเป็น "รปภ. ไซเบอร์" ช่วยหาจุดรั่วไหลของโปรแกรมก่อนโดนแฮก
-        </h4>
-
-        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">📌</span>
-            <p><strong class="text-white font-medium">เรื่องคือ:</strong> Anthropic เปิดให้บริษัทใหญ่ใช้โมเดลตัวเก่ง ช่วยสแกนหาช่องโหว่ความปลอดภัยของระบบ พร้อมแจกทุนสนับสนุนนักพัฒนาโปรแกรมฟรีเพื่อความปลอดภัย</p>
-          </div>
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">💡</span>
-            <p><strong class="text-white font-medium">ดียังไง:</strong> ป้องกันระบบบริษัทและข้อมูลของผู้ใช้งานไม่ให้โดนแฮกเกอร์โจมตี</p>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex justify-end">
-          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            อ่านต้นฉบับเต็ม →
-          </a>
-        </div>
-      </article>
-
-      <!-- Card 4 -->
-      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-            🔬 งานวิจัย
-          </span>
-          <span class="text-xs text-slate-400">หัวข้อ: ความฉลาดของ AI</span>
-        </div>
-
-        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
-          ผลทดสอบชี้ชัด: AI วันนี้ยังไม่สามารถ "ฉลาดขึ้นเอง" โดยไม่ต้องมีคนช่วย
-        </h4>
-
-        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">📌</span>
-            <p><strong class="text-white font-medium">เรื่องคือ:</strong> นักวิจัยจัดทดสอบว่า AI จะสามารถเขียนและปรับปรุงอัลกอริทึมของตัวเองให้ฉลาดขึ้นได้ไหม ปรากฏว่ายังทำคะแนนได้ต่ำมาก</p>
-          </div>
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">💡</span>
-            <p><strong class="text-white font-medium">ดียังไง:</strong> คลายความกังวลว่า AI จะพัฒนาตัวเองจนหลุดการควบคุม มนุษย์ยังคงเป็นหัวใจหลักในการสร้างและควบคุม AI เสมอ</p>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex justify-end">
-          <a href="https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            อ่านต้นฉบับเต็ม →
-          </a>
-        </div>
-      </article>
-
-      <!-- Card 5 -->
-      <article class="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition shadow-sm flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
-            🎵 วงการเพลง
-          </span>
-          <span class="text-xs text-slate-400">ประเทศ: ออสเตรเลีย</span>
-        </div>
-
-        <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">
-          ชาร์ตเพลงใหญ่ในออสเตรเลีย สั่งแบนเพลงที่แต่งโดย AI 100%
-        </h4>
-
-        <div class="space-y-2.5 text-sm text-slate-300 leading-relaxed">
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">📌</span>
-            <p><strong class="text-white font-medium">เรื่องคือ:</strong> ชาร์ตเพลงหลักของออสเตรเลียประกาศกฎเด็ดขาด เพลงที่จะมีสิทธิ์ติดชาร์ตยอดนิยมได้ ต้องมีมนุษย์เป็นคนแต่งและร้องเป็นหลักเท่านั้น</p>
-          </div>
-          <div class="flex items-start gap-2.5">
-            <span class="text-base">💡</span>
-            <p><strong class="text-white font-medium">ดียังไง:</strong> เพื่อปกป้องผลงานและรายได้ของศิลปินตัวจริง ไม่ให้โดนเพลง AI สร้างขึ้นมาแย่งพื้นที่</p>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-800 flex justify-end">
-          <a href="https://www.straitstimes.com/asia/australianz/australias-top-music-charts-ban-ai-songs" target="_blank" class="text-xs font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            อ่านต้นฉบับเต็ม →
-          </a>
-        </div>
-      </article>
-
-    </div>
+    <!-- Feed Container -->
+    <div class="space-y-5" id="feedContainer"></div>
 
   </main>
 
   <footer class="mt-12 text-center text-xs text-slate-500">
-    <p>AI Today • สรุปข่าว AI สดใหม่ทุกวัน</p>
+    <p>Daily Pulse • อัปเดตข้อมูลอัตโนมัติด้วย AI Assistant</p>
   </footer>
 
+  <script>
+    const SPREADSHEET_ID = '1l4JjYvBros8t8UaVxTpmeMou4WsiwoOJmcvkX_BW0u8';
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
+
+    let allData = [
+      { id: 1, type: "ai", tag: "⚡ ความเร็ว & ชิป", title: "ระบบรัน AI เร็วขึ้นกว่า 2 เท่า สั่งเปิดใช้งานไม่ต้องรอนาน", what: "โปรแกรมที่ใช้รัน AI มีการอัปเดตระบบจัดคิวความจำใหม่ ทำให้เวลาเปิดเครื่องเซิร์ฟเวอร์รันโมเดลขนาดใหญ่ ลดเวลาจาก 85 วินาที เหลือแค่ 36 วินาที", benefit: "ระบบตอบสนองไวขึ้น ธุรกิจประหยัดค่าเช่าเครื่องเซิร์ฟเวอร์ลงอย่างมาก", source: "AI/TLDR", url: "https://buttondown.com/ai-tldr/archive/aitldr-daily-digest-august-24-2026/" },
+      { id: 2, type: "ai", tag: "🎮 แอป & เกม", title: "ไม่ต้องเขียนโค้ดเป็น แค่พิมพ์สั่ง AI ก็สร้างมินิเกมและเว็บให้เล่นได้ทันที", what: "Meta เปิดตัวแอปชื่อ Pocket ให้คนทั่วไปพิมพ์ข้อความสั่งสร้างเกมสั้นๆ ไปเล่นกับเพื่อนบนโซเชียลได้ ส่วน Grok ก็เปิดให้ทุกคนสร้างหน้าเว็บได้ง่ายๆ", benefit: "จากเดิมที่ AI ทำได้แค่แต่งรูปหรือตอบแชต ตอนนี้กลายเป็นเครื่องมือสร้างโปรแกรมเล็กๆ ให้ใช้งานได้จริง", source: "Kaiyu Note", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
+      { id: 3, type: "ai", tag: "🔒 ความปลอดภัย", title: "ส่ง AI ไปเป็น 'รปภ. ไซเบอร์' ช่วยหาจุดรั่วไหลของโปรแกรมก่อนโดนแฮก", what: "Anthropic เปิดให้บริษัทใหญ่ใช้โมเดลตัวเก่ง ช่วยสแกนหาช่องโหว่ความปลอดภัยของระบบ พร้อมแจกทุนสนับสนุนนักพัฒนาโปรแกรมฟรีเพื่อความปลอดภัย", benefit: "ป้องกันระบบบริษัทและข้อมูลของผู้ใช้งานไม่ให้โดนแฮกเกอร์โจมตี", source: "Anthropic News", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
+      { id: 4, type: "ai", tag: "🔬 งานวิจัย", title: "ผลทดสอบชี้ชัด: AI วันนี้ยังไม่สามารถ 'ฉลาดขึ้นเอง' โดยไม่ต้องมีคนช่วย", what: "นักวิจัยจัดทดสอบว่า AI จะสามารถเขียนและปรับปรุงอัลกอริทึมของตัวเองให้ฉลาดขึ้นได้ไหม ปรากฏว่ายังทำคะแนนได้ต่ำมาก", benefit: "คลายความกังวลว่า AI จะพัฒนาตัวเองจนหลุดการควบคุม มนุษย์ยังคงเป็นหัวใจหลักในการสร้างและควบคุม AI เสมอ", source: "AI4AI Bench", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
+      { id: 5, type: "ai", tag: "🎵 วงการเพลง", title: "ชาร์ตเพลงใหญ่ในออสเตรเลีย สั่งแบนเพลงที่แต่งโดย AI 100%", what: "ชาร์ตเพลงหลักของออสเตรเลียประกาศกฎเด็ดขาด เพลงที่จะมีสิทธิ์ติดชาร์ตยอดนิยมได้ ต้องมีมนุษย์เป็นคนแต่งและร้องเป็นหลักเท่านั้น", benefit: "เพื่อปกป้องผลงานและรายได้ของศิลปินตัวจริง ไม่ให้โดนเพลง AI สร้างขึ้นมาแย่งพื้นที่", source: "The Straits Times", url: "https://www.straitstimes.com/asia/australianz/australias-top-music-charts-ban-ai-songs" },
+      { id: 6, type: "stock", tag: "🇺🇸 S&P 500 (SCBS&P500)", title: "หุ้นสหรัฐฯ ทรงตัวรอตัวเลขเศรษฐกิจ ภาพรวมระยะยาวยังแข็งแกร่ง", what: "ดัชนี S&P 500 เคลื่อนไหวในกรอบแคบ นักลงทุนจับตาทิศทางอัตราดอกเบี้ยและผลประกอบการบริษัทเทคโนโลยี", benefit: "กองทุน SCBS&P500(E) ยังถือลงทุนตามแผนระยะยาวได้อย่างสบายใจ", source: "SCBAM Market", url: "https://www.scbam.com" },
+      { id: 7, type: "stock", tag: "🌍 MSCI World (SCBWORLD)", title: "หุ้นโลกเคลื่อนไหวตามตลาดหลัก เน้นการกระจายความเสี่ยงทั่วโลก", what: "ตลาดหุ้นกลุ่มประเทศพัฒนาแล้วเคลื่อนไหวสอดคล้องกับสหรัฐฯ และยุโรป กระจายตัวในหลากหลายอุตสาหกรรม", benefit: "กองทุน SCBWORLD(E) ช่วยกระจายความเสี่ยง ไม่พึ่งพาเศรษฐกิจประเทศใดประเทศหนึ่งมากเกินไป", source: "MSCI World", url: "https://www.msci.com" },
+      { id: 8, type: "stock", tag: "🇨🇳 China Tech (SCBCTECH)", title: "หุ้นเทคโนโลยีจีนฟื้นตัวตามกระแสการลงทุน AI ในประเทศ", what: "หุ้นเทคจีนรายใหญ่อย่าง Tencent และ Alibaba มีแรงซื้อกลับเข้ามาจากการเร่งขยายระบบประมวลผล AI", benefit: "กองทุน SCBCTECH(E) มีจังหวะฟื้นตัวระยะสั้น เหมาะสำหรับคนทยอยสะสมตามรอบ", source: "Hang Seng Index", url: "https://www.hsi.com.hk" },
+      { id: 9, type: "stock", tag: "🪙 Gold Spot (SCBGOLD)", title: "ราคาทองคำโลกทรงตัวในระดับสูง ทำหน้าที่เป็นเกราะป้องกันความเสี่ยง", what: "ราคาทองคำยังทรงตัวอยู่ในระดับสูง ได้รับแรงหนุนจากความต้องการสินทรัพย์ปลอดภัยและการถือครองของธนาคารกลาง", benefit: "กองทุน SCBGOLD(E) ช่วยลดความผันผวนของพอร์ตเวลามีข่าวตึงเครียดในตลาด", source: "World Gold Council", url: "https://www.gold.org" }
+    ];
+
+    let currentTab = 'ai';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFeed();
+      fetchLiveNews();
+    });
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabAi = document.getElementById('tabAi');
+      const tabStock = document.getElementById('tabStock');
+      const aiSummary = document.getElementById('aiSummaryBox');
+      const stockSummary = document.getElementById('stockSummaryBox');
+
+      if (tab === 'ai') {
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
+        aiSummary.classList.remove('hidden');
+        stockSummary.classList.add('hidden');
+      } else {
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm";
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
+        stockSummary.classList.remove('hidden');
+        aiSummary.classList.add('hidden');
+      }
+      renderFeed();
+    }
+
+    function renderFeed() {
+      const container = document.getElementById('feedContainer');
+      container.innerHTML = '';
+
+      const items = allData.filter(item => item.type === currentTab);
+
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = "p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition shadow-sm flex flex-col gap-3.5";
+
+        const badgeColor = item.type === 'stock' 
+          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+          : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border ${badgeColor}">
+              ${item.tag}
+            </span>
+            <span class="text-[11px] text-slate-400">แหล่งข้อมูล: ${item.source}</span>
+          </div>
+
+          <h3 class="text-base sm:text-lg font-bold text-white leading-snug">
+            ${item.title}
+          </h3>
+
+          <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+            <div class="flex items-start gap-2">
+              <span class="text-sm">📌</span>
+              <p><strong class="text-white font-medium">เรื่องคือ:</strong> ${item.what}</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-sm">💡</span>
+              <p><strong class="text-white font-medium">มุมมอง / ประโยชน์:</strong> ${item.benefit}</p>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-800/60 flex justify-end">
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium ${item.type === 'stock' ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'} flex items-center gap-1">
+              อ่านรายละเอียดเพิ่มเติม →
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function fetchLiveNews() {
+      const spinner = document.getElementById('refreshSpinner');
+      spinner.classList.add('animate-spin');
+      try {
+        const response = await fetch(GVIZ_URL);
+        const text = await response.text();
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+        if (jsonMatch && jsonMatch) {
+          const data = JSON.parse(jsonMatch);
+          const rows = data.table.rows;
+          if (rows && rows.length > 0) {
+            const parsed = rows.map((r, index) => {
+              const c = r.c;
+              const cat = c ? c.v : '';
+              const isStock = cat.includes('ตลาดหุ้น') || cat.includes('พอร์ต') || cat.includes('หุ้น') || cat.includes('ทองคำ');
+              return {
+                id: c[0] ? c[0].v : (index + 1),
+                type: isStock ? 'stock' : 'ai',
+                tag: isStock ? (c[3] ? c[3].v.split(':')[0] : 'การลงทุน') : (c ? c.v : 'AI News'),
+                title: c[3] ? c[3].v : '',
+                what: c[4] ? c[4].v : '',
+                benefit: c[5] ? c[5].v : '',
+                source: c[6] ? c[6].v : 'แหล่งข่าว',
+                url: c[7] ? c[7].v : '#'
+              };
+            }).filter(item => item.title && item.title !== 'Title');
+            if (parsed.length > 0) {
+              allData = parsed;
+              renderFeed();
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Using local fallback:', err);
+      } finally {
+        setTimeout(() => { spinner.classList.remove('animate-spin'); }, 500);
+      }
+    }
+  </script>
 </body>
 </html>
