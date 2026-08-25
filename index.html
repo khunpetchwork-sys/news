@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Pulse — ศูนย์รวมสรุปข่าว AI ประจำวัน</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,7 +18,6 @@
       }
     }
   </script>
-  <!-- Google Fonts & Font Awesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +33,6 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
-  <!-- Header -->
   <header class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 glass-card">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -65,14 +62,14 @@
     </div>
   </header>
 
-  <!-- Audio Floating Control Bar -->
+  <!-- Audio Floating Bar -->
   <div id="audioPlayerBar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl p-3 sm:p-4 rounded-2xl bg-slate-900/95 dark:bg-slate-800/95 text-white shadow-2xl border border-slate-700 backdrop-blur-xl flex items-center justify-between gap-3">
     <div class="flex items-center gap-3 overflow-hidden">
       <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0 animate-pulse">
         <i class="fa-solid fa-volume-high"></i>
       </div>
       <div class="truncate">
-        <p class="text-xs text-indigo-300 font-medium">กำลังอ่านออกเสียง...</p>
+        <p id="audioStatusText" class="text-xs text-indigo-300 font-medium">กำลังอ่านเสียงภาษาไทย...</p>
         <p id="audioNewsTitle" class="text-sm font-semibold truncate">หัวข้อข่าว</p>
       </div>
     </div>
@@ -88,8 +85,6 @@
 
   <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full">
-    
-    <!-- Hero Banner -->
     <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-xl shadow-indigo-500/15 relative overflow-hidden">
       <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
       <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -99,17 +94,17 @@
             อัปเดตล่าสุด: <span id="currentDateDisplay" class="font-semibold">25 สิงหาคม 2026</span>
           </div>
           <h2 class="text-2xl sm:text-3xl font-extrabold leading-tight">สรุปข่าวและโมเดล AI เด่นรอบวัน</h2>
-          <p class="text-indigo-100 text-sm mt-1">คัดเฉพาะประเด็นสำคัญ เทคโนโลยีใหม่ และผลกระทบต่อธุรกิจ อ่านจบใน 3 นาที</p>
+          <p class="text-indigo-100 text-sm mt-1">คัดเฉพาะประเด็นสำคัญ เทคโนโลยีใหม่ และผลกระทบต่อธุรกิจ อ่านและฟังจบใน 3 นาที</p>
         </div>
         <div class="flex items-center gap-3">
           <button onclick="readAllNews()" class="px-4 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-semibold text-sm shadow-md transition flex items-center gap-2">
-            <i class="fa-solid fa-play"></i> ฟังเสียงสรุปทั้งหมด
+            <i class="fa-solid fa-play"></i> ฟังเสียงสรุปทั้งหมด (ภาษาไทย)
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Search & Filter Controls -->
+    <!-- Category & Search -->
     <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
       <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" id="categoryContainer">
         <button onclick="filterCategory('all')" class="cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap bg-indigo-600 text-white">ทั้งหมด</button>
@@ -126,7 +121,7 @@
       </div>
     </div>
 
-    <!-- News Grid Container -->
+    <!-- News Grid -->
     <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
     <!-- Empty State -->
@@ -137,28 +132,23 @@
       <h3 class="text-base font-semibold text-slate-700 dark:text-slate-300">ไม่พบข่าวที่ค้นหา</h3>
       <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะครับ</p>
     </div>
-
   </main>
 
-  <!-- Footer -->
   <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 py-6">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
       <p>© 2026 AI Pulse — ขับเคลื่อนและอัปเดตข้อมูลอัตโนมัติด้วย AI Assistant</p>
       <div class="flex items-center gap-4">
         <span class="text-emerald-500 font-medium">● เชื่อมต่อ Live Database</span>
         <span>•</span>
-        <span>รองรับ Web Speech Audio</span>
+        <span>Web Speech Thai</span>
       </div>
     </div>
   </footer>
 
-  <!-- Script Logic -->
   <script>
-    // Live Google Sheets Backend URL
     const SPREADSHEET_ID = '1l4JjYvBros8t8UaVxTpmeMou4WsiwoOJmcvkX_BW0u8';
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
-    // Default Fallback Dataset
     let newsData = [
       {
         id: 1,
@@ -221,16 +211,132 @@
     let searchQuery = '';
     let isBookmarkOnly = false;
     let bookmarks = JSON.parse(localStorage.getItem('ai_news_bookmarks') || '[]');
-    let currentUtterance = null;
+
+    // Audio Engine
+    let availableVoices = [];
+    let thaiVoice = null;
+    let audioQueue = [];
+    let audioQueueIndex = 0;
+    let keepAliveInterval = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       updateBookmarkCount();
       renderNews();
       initTheme();
+      initSpeechEngine();
       fetchLiveNews();
     });
 
-    // ดึงข้อมูลสดจาก Google Sheets
+    function initSpeechEngine() {
+      if (!('speechSynthesis' in window)) return;
+      function updateVoiceList() {
+        availableVoices = window.speechSynthesis.getVoices();
+        thaiVoice = availableVoices.find(v => 
+          v.lang === 'th-TH' || 
+          v.lang.toLowerCase().startsWith('th') || 
+          v.name.toLowerCase().includes('thai') || 
+          v.name.includes('ไทย')
+        ) || null;
+      }
+      updateVoiceList();
+      window.speechSynthesis.onvoiceschanged = updateVoiceList;
+    }
+
+    function readSingleNews(id) {
+      const item = newsData.find(n => n.id === id);
+      if (!item) return;
+      stopSpeech();
+      audioQueue = [{ title: item.title, text: item.speechText }];
+      audioQueueIndex = 0;
+      playCurrentQueueItem();
+    }
+
+    function readAllNews() {
+      stopSpeech();
+      audioQueue = newsData.map((item, idx) => ({
+        title: `ข่าวที่ ${idx + 1}: ${item.title}`,
+        text: item.speechText
+      }));
+      audioQueueIndex = 0;
+      playCurrentQueueItem();
+    }
+
+    function playCurrentQueueItem() {
+      if (!('speechSynthesis' in window)) {
+        alert('ขออภัย เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง');
+        return;
+      }
+      if (audioQueueIndex >= audioQueue.length) {
+        stopSpeech();
+        return;
+      }
+
+      const current = audioQueue[audioQueueIndex];
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(current.text);
+      utterance.lang = 'th-TH'; // บังคับภาษาไทย
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      if (!thaiVoice) initSpeechEngine();
+      if (thaiVoice) utterance.voice = thaiVoice;
+
+      document.getElementById('audioNewsTitle').innerText = current.title;
+      document.getElementById('audioStatusText').innerText = `กำลังอ่าน (${audioQueueIndex + 1}/${audioQueue.length})`;
+      document.getElementById('audioPlayerBar').classList.remove('hidden');
+      document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
+
+      clearInterval(keepAliveInterval);
+      keepAliveInterval = setInterval(() => {
+        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }, 10000);
+
+      utterance.onend = () => {
+        audioQueueIndex++;
+        if (audioQueueIndex < audioQueue.length) {
+          setTimeout(playCurrentQueueItem, 400);
+        } else {
+          stopSpeech();
+        }
+      };
+
+      utterance.onerror = () => {
+        audioQueueIndex++;
+        if (audioQueueIndex < audioQueue.length) {
+          setTimeout(playCurrentQueueItem, 400);
+        } else {
+          stopSpeech();
+        }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function pauseResumeSpeech() {
+      if (!('speechSynthesis' in window)) return;
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
+      } else if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+        document.getElementById('playPauseIcon').className = 'fa-solid fa-play text-xs';
+      }
+    }
+
+    function stopSpeech() {
+      clearInterval(keepAliveInterval);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      document.getElementById('audioPlayerBar').classList.add('hidden');
+      audioQueue = [];
+      audioQueueIndex = 0;
+    }
+
     async function fetchLiveNews() {
       const refreshIcon = document.getElementById('refreshIcon');
       refreshIcon.classList.add('animate-spin');
@@ -247,7 +353,7 @@
               return {
                 id: c[0] ? c[0].v : (index + 1),
                 date: c ? c.v : '',
-                category: c[2] ? c[2].v : 'ทั่วไป',
+                category: c ? c.v : 'ทั่วไป',
                 title: c[3] ? c[3].v : '',
                 summary: c[4] ? c[4].v : '',
                 impact: c[5] ? c[5].v : '',
@@ -411,60 +517,6 @@
         localStorage.theme = 'dark';
         document.getElementById('themeIcon').className = 'fa-solid fa-moon';
       }
-    }
-
-    // ระบบอ่านออกเสียง Web Speech API
-    function readSingleNews(id) {
-      const item = newsData.find(n => n.id === id);
-      if (!item) return;
-      playSpeechText(item.speechText, item.title);
-    }
-
-    function readAllNews() {
-      const allText = "สวัสดีครับ สรุปข่าวเอไอประจำวันนี้ครับ " + newsData.map(n => n.speechText).join(" ");
-      playSpeechText(allText, "สรุปข่าว AI ทั้งหมดประจำวัน");
-    }
-
-    function playSpeechText(text, title) {
-      if (!('speechSynthesis' in window)) {
-        alert('ขออภัย เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง');
-        return;
-      }
-      window.speechSynthesis.cancel();
-      currentUtterance = new SpeechSynthesisUtterance(text);
-      currentUtterance.lang = 'th-TH';
-      currentUtterance.rate = 1.0;
-      currentUtterance.pitch = 1.0;
-
-      const voices = window.speechSynthesis.getVoices();
-      const thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH'));
-      if (thaiVoice) currentUtterance.voice = thaiVoice;
-
-      document.getElementById('audioNewsTitle').innerText = title;
-      document.getElementById('audioPlayerBar').classList.remove('hidden');
-      document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
-
-      currentUtterance.onend = () => { stopSpeech(); };
-      currentUtterance.onerror = () => { stopSpeech(); };
-      window.speechSynthesis.speak(currentUtterance);
-    }
-
-    function pauseResumeSpeech() {
-      if (!('speechSynthesis' in window)) return;
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-        document.getElementById('playPauseIcon').className = 'fa-solid fa-pause text-xs';
-      } else if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.pause();
-        document.getElementById('playPauseIcon').className = 'fa-solid fa-play text-xs';
-      }
-    }
-
-    function stopSpeech() {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      document.getElementById('audioPlayerBar').classList.add('hidden');
     }
   </script>
 </body>
