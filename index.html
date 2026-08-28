@@ -3,362 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Pulse — สรุปข่าว AI, ตลาดหุ้น & ภาพรวมรายสัปดาห์</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Daily Pulse — สรุปข่าว AI & ตลาดหุ้น เข้าใจง่าย</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Prompt', 'Inter', sans-serif;
-      background-color: #090d16;
-      color: #f8fafc;
-    }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    body { font-family: 'Prompt', 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
   </style>
 </head>
-<body class="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white pb-20">
+<body class="min-h-screen bg-[#0b0f19] text-slate-100 antialiased pb-16">
 
   <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-[#090d16]/80 backdrop-blur-xl sticky top-0 z-30">
+  <header class="border-b border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-xl sticky top-0 z-30">
     <div class="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <span class="text-2xl">⚡</span>
         <div>
           <h1 class="text-base font-bold tracking-tight text-white leading-tight">Daily Pulse</h1>
-          <p class="text-[11px] text-slate-400">สรุปข่าว AI, พอร์ตหุ้น & วิเคราะห์รายสัปดาห์</p>
+          <p class="text-[11px] text-slate-400">สรุปข่าว AI & พอร์ตหุ้น ภาษาคน</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="fetchLiveNews()" class="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs flex items-center gap-1.5" title="รีเฟรชข้อมูลล่าสุด">
-          <span id="refreshSpinner" class="inline-block">🔄</span>
-          <span class="text-[11px] font-medium hidden sm:inline">อัปเดตสด</span>
+          <span id="refreshSpinner">🔄</span>
+          <span class="text-[11px] font-medium hidden sm:inline">รีเฟรช</span>
         </button>
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="headerLiveDate">27 ส.ค. 2026</span>
+          <span id="currentDateDisplay">กำลังโหลด...</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Content -->
   <main class="max-w-2xl mx-auto px-5 pt-6 sm:pt-8">
-
-    <!-- 3 Main Tabs (AI / Stock / Weekly) -->
-    <div class="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
-      <button id="tabAi" onclick="switchTab('ai')" class="py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-sm">
-        <span>🤖 ข่าว AI</span>
+    
+    <!-- Tab Selector -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
+      <button id="tabAi" onclick="switchTab('ai')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+        <span>🤖 ข่าว AI ประจำวัน</span>
       </button>
-      <button id="tabStock" onclick="switchTab('stock')" class="py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
-        <span>📈 พอร์ตหุ้น</span>
+      <button id="tabStock" onclick="switchTab('stock')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50">
+        <span>📈 ตลาดหุ้น & พอร์ต</span>
       </button>
-      <button id="tabWeekly" onclick="switchTab('weekly')" class="py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
-        <span>📓 สรุปรายสัปดาห์</span>
-      </button>
-    </div>
-
-    <!-- Date Filter Bar (สำหรับย้อนดูข่าวเก่า) -->
-    <div id="dateFilterSection" class="mb-6">
-      <div class="flex items-center justify-between mb-2.5">
-        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-          <span>📅 เลือกวันที่ต้องการดู:</span>
-        </span>
-        <span id="activeDateLabel" class="text-xs text-indigo-400 font-medium">แสดงข่าว: 27 ส.ค. 2026</span>
-      </div>
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" id="datePillsContainer"></div>
-    </div>
-
-    <!-- AI 30-Second Summary Box -->
-    <div id="aiSummaryBox" class="mb-6 p-5 rounded-3xl bg-gradient-to-br from-indigo-950/60 to-purple-950/40 border border-indigo-500/20 shadow-lg">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-base">⏱️</span>
-        <h2 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">สรุปด่วน AI วันนี้ (30 วินาที)</h2>
-      </div>
-      <ul class="space-y-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
-        <li class="flex items-start gap-2">
-          <span class="text-indigo-400">•</span>
-          <span><strong>Nvidia Q2 ทุบสถิติ:</strong> รายได้พุ่ง 96.2 พันล้านดอลลาร์ ความต้องการชิป AI Data Center ทั่วโลกยังเติบโตมหาศาล</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="text-indigo-400">•</span>
-          <span><strong>เฉลยโมเดลลับ Ox Alpha:</strong> Z.ai เปิดตัว GLM-5.3 Flash ตัวท็อปสายประหยัด รองรับบริบท 1 ล้านโทเคน</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="text-indigo-400">•</span>
-          <span><strong>OpenAI ซุ่มทำชิปเอง:</strong> เผยผลทดสอบชิป Jalapeño สำหรับรันโมเดล ประหยัดไฟและคุมต้นทุนค่าบริการ</span>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Stock Summary Box -->
-    <div id="stockSummaryBox" class="hidden mb-6 p-5 rounded-3xl bg-gradient-to-br from-emerald-950/60 to-teal-950/40 border border-emerald-500/20 shadow-lg">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-base">📊</span>
-        <h2 class="text-xs font-bold text-emerald-300 uppercase tracking-wider">สรุปภาพรวม 4 สินทรัพย์ในพอร์ต</h2>
-      </div>
-      <ul class="space-y-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
-        <li class="flex items-start gap-2">
-          <span class="text-emerald-400">•</span>
-          <span><strong>S&P 500 (SCBS&P500):</strong> หุ้นสหรัฐฯ ทรงตัวรอตัวเลขเศรษฐกิจ ภาพรวมระยะยาวยังแข็งแกร่ง</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="text-emerald-400">•</span>
-          <span><strong>MSCI World (SCBWORLD):</strong> หุ้นโลกเคลื่อนไหวตามตลาดหลัก เน้นการกระจายความเสี่ยง</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="text-emerald-400">•</span>
-          <span><strong>China Tech (SCBCTECH) & Gold (SCBGOLD):</strong> เทคจีนเริ่มฟื้นตัวตามกระแส AI / ทองคำโลกทรงตัวสูง</span>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Weekly View Section -->
-    <div id="weeklySection" class="hidden mb-6 space-y-5">
-      <div class="p-6 rounded-3xl bg-gradient-to-br from-purple-950/60 to-indigo-950/40 border border-purple-500/20 shadow-lg">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">📓</span>
-            <div>
-              <h2 class="text-base font-bold text-purple-200">สรุปภาพรวมและแนวโน้ม AI รายสัปดาห์</h2>
-              <p class="text-xs text-purple-300/80">สัปดาห์ประจำวันที่ 17–24 สิงหาคม 2026</p>
-            </div>
-          </div>
-          <a href="https://gemini.google.com/notebook/e32bdd0f-0713-4615-a0f3-2ea0c25387de" target="_blank" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white flex items-center gap-1 transition">
-            เปิดสมุดบันทึก ↗
-          </a>
-        </div>
-
-        <div class="space-y-4 text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
-          <div class="p-4 rounded-2xl bg-slate-900/60 border border-purple-500/10">
-            <h3 class="font-bold text-purple-300 text-sm mb-1.5">1. วงการ Agent รวมมาตรฐานระดับโลก (Protocol Unification)</h3>
-            <p>โปรโตคอล A2A ของ Google ได้เข้าร่วมกับ MCP ของ Anthropic ภายใต้ Linux Foundation ทำให้ AI ต่างค่ายสามารถคุยกันและเรียกใช้เครื่องมือร่วมกันได้อย่างไร้รอยต่อ ลดปัญหาการผูกขาด</p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-slate-900/60 border border-purple-500/10">
-            <h3 class="font-bold text-purple-300 text-sm mb-1.5">2. ก้าวถัดไปคือ GUI Agent (AI คุมหน้าจอแทนคน)</h3>
-            <p>Alibaba ปล่อย Qwen-UI-Agent ที่มองเห็นหน้าจอและคลิกสั่งงานบนคอมพิวเตอร์และมือถือได้โดยตรง ช่วยให้ AI เข้าไปทำงานในโปรแกรมเก่าๆ ที่ไม่มี API ได้</p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-slate-900/60 border border-purple-500/10">
-            <h3 class="font-bold text-purple-300 text-sm mb-1.5">3. AI ก้าวเข้าสู่แล็บชีววิทยาและการแพทย์จริง</h3>
-            <p>Anthropic จับมือห้องแล็บทดสอบการออกแบบโปรตีนจริง พบว่ามีอัตราความสำเร็จสูงกว่าค่าเฉลี่ยเดิม ช่วยย่นระยะเวลาการวิจัยยาใหม่ได้อย่างมหาศาล</p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-slate-900/60 border border-purple-500/10">
-            <h3 class="font-bold text-purple-300 text-sm mb-1.5">4. ยุคของการกำกับดูแลและความปลอดภัย</h3>
-            <p>กฎหมาย EU AI Act เริ่มบังคับใช้การติดป้ายและลายน้ำบนผลงาน AI พร้อมคำเตือนช่องโหว่ความปลอดภัยระดับวิกฤตบนเฟรมเวิร์ก Ray ที่นักพัฒนาต้องรีบอัปเดต</p>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Feed Container -->
     <div class="space-y-5" id="feedContainer"></div>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 text-2xl">
-        <span>📭</span>
-      </div>
-      <h3 class="text-sm font-semibold text-slate-300">ไม่มีรายการข่าวในวันที่เลือก</h3>
-      <p class="text-xs text-slate-500 mt-1">ลองกดเลือก "ดูทั้งหมด" หรือเลือกวันอื่นดูนะครับ</p>
-    </div>
-
   </main>
 
   <footer class="mt-12 text-center text-xs text-slate-500">
-    <p>Daily Pulse • อัปเดตข้อมูลอัตโนมัติด้วย AI Assistant</p>
+    <p>Daily Pulse • ดึงข้อมูลสดจาก AI News Database อัตโนมัติ</p>
   </footer>
 
   <script>
     const SPREADSHEET_ID = '1l4JjYvBros8t8UaVxTpmeMou4WsiwoOJmcvkX_BW0u8';
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
-    let allData = [
-      // 27 Aug 2026
-      { id: 15, date: "27 สิงหาคม 2026", type: "ai", tag: "⚡ ชิป & เซิร์ฟเวอร์", title: "Nvidia รายได้ Q2 ทะลุ 9.6 หมื่นล้านดอลลาร์ ดีมานด์ชิป AI ยังโตแรง", what: "Nvidia ประกาศรายได้ไตรมาส 2 โต 106% เทียบรายปี จากความต้องการชิป Blackwell และการสร้าง Data Center ทั่วโลก", benefit: "ตอกย้ำว่าบริษัทเทคโนโลยีทั่วโลกยังคงทุ่มงบลงทุนโครงสร้างพื้นฐาน AI อย่างต่อเนื่อง", source: "Nvidia News", url: "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-second-quarter-fiscal-2027" },
-      { id: 16, date: "27 สิงหาคม 2026", type: "ai", tag: "🤖 โมเดลใหม่", title: "Z.ai เปิดตัว GLM-5.3 Flash เฉลยตัวจริงคือโมเดลลับ Ox Alpha", what: "เปิดตัวโมเดลโอเพนซอร์สขนาด 320B ที่ใช้พลังงานน้อย รองรับบริบท 1 ล้านโทเคน และเฉลยว่าเป็นโมเดลปริศนาที่โด่งดังบน OpenRouter", benefit: "นักพัฒนาได้โมเดลระดับท็อปไปใช้งานฟรีในราคาประหยัด รันงานยาวๆ ได้สบาย", source: "Fello AI", url: "https://felloai.com/fr/glm-5-3-flash/" },
-      { id: 17, date: "27 สิงหาคม 2026", type: "ai", tag: "🚀 โมเดลสายประหยัด", title: "Alibaba เตรียมปล่อย Qwen 3.8 Flash-Next เน้นความเร็วสูงและคุมงบ", what: "Alibaba เตรียมเปิดให้ดาวน์โหลดโมเดลรุ่นใหม่ ออกแบบมาเพื่อรัน AI Agent ปริมาณมากโดยเฉพาะ", benefit: "ช่วยลดค่าใช้จ่ายในการรัน AI ทำงานอัตโนมัติตลอดทั้งวันอย่างมาก", source: "AI Business", url: "https://aibusiness.com/generative-ai/qwen-3-8-flash-next-cheap-there-are-complicating-factors" },
-      { id: 18, date: "27 สิงหาคม 2026", type: "ai", tag: "⚡ ชิปเฉพาะทาง", title: "OpenAI ซุ่มทำชิปของตัวเอง 'Jalapeño' เพื่อลดต้นทุนค่ารันระบบ", what: "OpenAI เผยข้อมูลชิปที่ออกแบบเองสำหรับประมวลผลคำตอบ เพื่อลดการพึ่งพาฮาร์ดแวร์ภายนอกและประหยัดพลังงาน", benefit: "ช่วยให้ OpenAI ควบคุมต้นทุนและรักษาค่าบริการโมเดลไม่ให้แพงเกินไปในอนาคต", source: "AI Business Weekly", url: "https://aibusinessweekly.net/p/openai-apple-salesforce-gatik-ai-news-august-26-2026" },
-      { id: 19, date: "27 สิงหาคม 2026", type: "ai", tag: "👥 สังคม & แรงงาน", title: "บิล เกตส์ เตือนรับมือผลกระทบแรงงานจากการทำงานอัตโนมัติของ AI", what: "เรียกร้องให้ภาครัฐและธุรกิจเร่งวางแผนพัฒนาทักษะพนักงาน เพื่อเตรียมพร้อมรับมือกับการที่ AI Agent เข้ามาช่วยทำงานออฟฟิศ", benefit: "เตือนให้คนทำงานเริ่มปรับตัวและเรียนรู้วิธีใช้ AI เป็นผู้ช่วยในการทำงาน", source: "ABS-CBN News", url: "https://www.abs-cbn.com/news/technology/2026/8/27/bill-gates-warns-world-unprepared-for-ai-upheaval-0904" },
-
-      // 26 Aug 2026
-      { id: 10, date: "26 สิงหาคม 2026", type: "ai", tag: "🍎 ฮาร์ดแวร์ & AI", title: "Apple เปิดตัว Mac mini ชิป M6 & M5 Pro รัน AI ในเครื่องเร็วขึ้น 4 เท่า", what: "เปิดตัวเครื่องรุ่นใหม่ที่เน้นพลังประมวลผล AI บนเครื่อง ออกแบบมาเพื่อรัน AI Agent ส่วนตัวบนโต๊ะทำงาน", benefit: "รัน AI ได้รวดเร็วและปลอดภัย ข้อมูลส่วนตัวไม่หลุดขึ้นคลาวด์", source: "Apple Newsroom", url: "https://www.apple.com/newsroom/2026/08/apple-unveils-a-more-powerful-mac-mini-featuring-the-all-new-m6-and-m5-pro/" },
-      { id: 11, date: "26 สิงหาคม 2026", type: "ai", tag: "🎬 วิดีโอ AI", title: "Alibaba ปล่อยโมเดลวิดีโอ Wan 3.0 สร้างคลิปคุณภาพสูงยาว 30 วินาที", what: "โมเดลสร้างวิดีโอรุ่นใหม่ สังเคราะห์คลิปความยาวสูงสุด 30 วินาที พร้อมการเคลื่อนไหวที่สมจริงขึ้น", benefit: "ช่วยให้ครีเอเตอร์สร้างคลิปและสตอรี่บอร์ดโฆษณาได้ยาวและเนียนขึ้น", source: "AI Industry Daily", url: "https://buttondown.com/aiindustrydaily/archive/ai-industry-daily-tuesday-august-25-2026/" },
-      { id: 12, date: "26 สิงหาคม 2026", type: "ai", tag: "🌐 โลกเสมือน", title: "เปิดตัว HiDream-O1-World โมเดลเข้าใจภาพ เสียง และมิติ 3D พร้อมกัน", what: "โมเดลเข้าใจสภาพแวดล้อมและฟิสิกส์โลกจริง ประมวลผลภาพ เสียง และมิติสามมิติแบบเรียลไทม์", benefit: "เป็นรากฐานสำคัญสำหรับการพัฒนาหุ่นยนต์อัตโนมัติในอนาคต", source: "VIR News", url: "https://vir.com.vn/hidreamai-releases-hidream-o1-world-interactive-artificial-intelligence-model-159321.html" },
-      { id: 13, date: "26 สิงหาคม 2026", type: "ai", tag: "🔒 ความปลอดภัย", title: "เตือนภัย! คำสั่งเข้ารหัสลับสามารถหลอกข้ามระบบความปลอดภัยของ AI ได้", what: "นักวิจัยพบว่าการแปลงคำสั่งเป็นรหัสลับ ทำให้ AI ชั้นนำยอมตอบคำถามต้องห้าม", benefit: "แจ้งเตือนให้ผู้พัฒนาเร่งอัปเกรดระบบตรวจจับคำสั่งให้รัดกุมขึ้น", source: "Malwarebytes", url: "https://www.malwarebytes.com/blog/ai/2026/08/encrypted-instructions-can-fool-ai-assistants-like-grok-and-gemini" },
-      { id: 14, date: "26 สิงหาคม 2026", type: "ai", tag: "🏆 อันดับโลก", title: "Claude Mythos 5 ครองอันดับ 1 ตารางคะแนนโมเดล AI โลกบน BenchLM", what: "คะแนนทดสอบรวมสูงสุด 83.13 เต็ม 100 โดดเด่นด้านการใช้เหตุผลและการตรวจจับช่องโหว่ความปลอดภัย", benefit: "ยืนยันความแข็งแกร่งของ Anthropic ในตลาดโมเดลระดับองค์กร", source: "BenchLM", url: "https://benchlm.ai/stats" },
-
-      // 25 Aug 2026
-      { id: 1, date: "25 สิงหาคม 2026", type: "ai", tag: "⚡ ความเร็ว & ชิป", title: "ระบบรัน AI เร็วขึ้นกว่า 2 เท่า สั่งเปิดใช้งานไม่ต้องรอนาน", what: "โปรแกรมที่ใช้รัน AI มีการอัปเดตระบบจัดคิวความจำใหม่ ทำให้เวลาเปิดเครื่องเซิร์ฟเวอร์รันโมเดลขนาดใหญ่ ลดเวลาจาก 85 วินาที เหลือแค่ 36 วินาที", benefit: "ระบบตอบสนองไวขึ้น ธุรกิจประหยัดค่าเช่าเครื่องเซิร์ฟเวอร์ลงอย่างมาก", source: "AI/TLDR", url: "https://buttondown.com/ai-tldr/archive/aitldr-daily-digest-august-24-2026/" },
-      { id: 2, date: "25 สิงหาคม 2026", type: "ai", tag: "🎮 แอป & เกม", title: "ไม่ต้องเขียนโค้ดเป็น แค่พิมพ์สั่ง AI ก็สร้างมินิเกมและเว็บให้เล่นได้ทันที", what: "Meta เปิดตัวแอปชื่อ Pocket ให้คนทั่วไปพิมพ์ข้อความสั่งสร้างเกมสั้นๆ ไปเล่นกับเพื่อนบนโซเชียลได้ ส่วน Grok ก็เปิดให้ทุกคนสร้างหน้าเว็บได้ง่ายๆ", benefit: "จากเดิมที่ AI ทำได้แค่แต่งรูปหรือตอบแชต ตอนนี้กลายเป็นเครื่องมือสร้างโปรแกรมเล็กๆ ให้ใช้งานได้จริง", source: "Kaiyu Note", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
-      { id: 3, date: "25 สิงหาคม 2026", type: "ai", tag: "🔒 ความปลอดภัย", title: "ส่ง AI ไปเป็น 'รปภ. ไซเบอร์' ช่วยหาจุดรั่วไหลของโปรแกรมก่อนโดนแฮก", what: "Anthropic เปิดให้บริษัทใหญ่ใช้โมเดลตัวเก่ง ช่วยสแกนหาช่องโหว่ความปลอดภัยของระบบ พร้อมแจกทุนสนับสนุนนักพัฒนาโปรแกรมฟรีเพื่อความปลอดภัย", benefit: "ป้องกันระบบบริษัทและข้อมูลของผู้ใช้งานไม่ให้โดนแฮกเกอร์โจมตี", source: "Anthropic News", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
-      { id: 4, date: "25 สิงหาคม 2026", type: "ai", tag: "🔬 งานวิจัย", title: "ผลทดสอบชี้ชัด: AI วันนี้ยังไม่สามารถ 'ฉลาดขึ้นเอง' โดยไม่ต้องมีคนช่วย", what: "นักวิจัยจัดทดสอบว่า AI จะสามารถเขียนและปรับปรุงอัลกอริทึมของตัวเองให้ฉลาดขึ้นได้ไหม ปรากฏว่ายังทำคะแนนได้ต่ำมาก", benefit: "คลายความกังวลว่า AI จะพัฒนาตัวเองจนหลุดการควบคุม มนุษย์ยังคงเป็นหัวใจหลักในการสร้างและควบคุม AI เสมอ", source: "AI4AI Bench", url: "https://note.com/kaiyu06/n/ne9370caa4d60?hl=en" },
-      { id: 5, date: "25 สิงหาคม 2026", type: "ai", tag: "🎵 วงการเพลง", title: "ชาร์ตเพลงใหญ่ในออสเตรเลีย สั่งแบนเพลงที่แต่งโดย AI 100%", what: "ชาร์ตเพลงหลักของออสเตรเลียประกาศกฎเด็ดขาด เพลงที่จะมีสิทธิ์ติดชาร์ตยอดนิยมได้ ต้องมีมนุษย์เป็นคนแต่งและร้องเป็นหลักเท่านั้น", benefit: "เพื่อปกป้องผลงานและรายได้ของศิลปินตัวจริง ไม่ให้โดนเพลง AI สร้างขึ้นมาแย่งพื้นที่", source: "The Straits Times", url: "https://www.straitstimes.com/asia/australianz/australias-top-music-charts-ban-ai-songs" },
-
-      // Stocks
-      { id: 6, date: "27 สิงหาคม 2026", type: "stock", tag: "🇺🇸 S&P 500 (SCBS&P500)", title: "หุ้นสหรัฐฯ ทรงตัวรอตัวเลขเศรษฐกิจ ภาพรวมระยะยาวยังแข็งแกร่ง", what: "ดัชนี S&P 500 เคลื่อนไหวในกรอบแคบ นักลงทุนจับตาทิศทางอัตราดอกเบี้ยและผลประกอบการบริษัทเทคโนโลยี", benefit: "กองทุน SCBS&P500(E) ยังถือลงทุนตามแผนระยะยาวได้อย่างสบายใจ", source: "SCBAM Market", url: "https://www.scbam.com" },
-      { id: 7, date: "27 สิงหาคม 2026", type: "stock", tag: "🌍 MSCI World (SCBWORLD)", title: "หุ้นโลกเคลื่อนไหวตามตลาดหลัก เน้นการกระจายความเสี่ยงทั่วโลก", what: "ตลาดหุ้นกลุ่มประเทศพัฒนาแล้วเคลื่อนไหวสอดคล้องกับสหรัฐฯ และยุโรป กระจายตัวในหลากหลายอุตสาหกรรม", benefit: "กองทุน SCBWORLD(E) ช่วยกระจายความเสี่ยง ไม่พึ่งพาเศรษฐกิจประเทศใดประเทศหนึ่งมากเกินไป", source: "MSCI World", url: "https://www.msci.com" },
-      { id: 8, date: "27 สิงหาคม 2026", type: "stock", tag: "🇨🇳 China Tech (SCBCTECH)", title: "หุ้นเทคโนโลยีจีนฟื้นตัวตามกระแสการลงทุน AI ในประเทศ", what: "หุ้นเทคจีนรายใหญ่อย่าง Tencent และ Alibaba มีแรงซื้อกลับเข้ามาจากการเร่งขยายระบบประมวลผล AI", benefit: "กองทุน SCBCTECH(E) มีจังหวะฟื้นตัวระยะสั้น เหมาะสำหรับคนทยอยสะสมตามรอบ", source: "Hang Seng Index", url: "https://www.hsi.com.hk" },
-      { id: 9, date: "27 สิงหาคม 2026", type: "stock", tag: "🪙 Gold Spot (SCBGOLD)", title: "ราคาทองคำโลกทรงตัวในระดับสูง ทำหน้าที่เป็นเกราะป้องกันความเสี่ยง", what: "ราคาทองคำยังทรงตัวอยู่ในระดับสูง ได้รับแรงหนุนจากความต้องการสินทรัพย์ปลอดภัยและการถือครองของธนาคารกลาง", benefit: "กองทุน SCBGOLD(E) ช่วยลดความผันผวนของพอร์ตเวลามีข่าวตึงเครียดในตลาด", source: "World Gold Council", url: "https://www.gold.org" }
-    ];
-
+    let allData = [];
     let currentTab = 'ai';
-    let selectedDate = 'all';
 
     document.addEventListener('DOMContentLoaded', () => {
-      initLatestDate();
-      renderDatePills();
-      renderFeed();
       fetchLiveNews();
     });
-
-    function initLatestDate() {
-      const dates = getUniqueDates();
-      if (dates.length > 0) {
-        selectedDate = dates[0];
-        document.getElementById('headerLiveDate').innerText = selectedDate;
-        document.getElementById('activeDateLabel').innerText = `แสดงข่าว: ${selectedDate}`;
-      }
-    }
-
-    function getUniqueDates() {
-      const dates = [...new Set(allData.map(item => item.date))].filter(Boolean);
-      return dates;
-    }
-
-    function renderDatePills() {
-      const container = document.getElementById('datePillsContainer');
-      container.innerHTML = '';
-
-      const dates = getUniqueDates();
-
-      const allBtn = document.createElement('button');
-      allBtn.className = `px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${selectedDate === 'all' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'}`;
-      allBtn.innerText = '📁 ดูทั้งหมด (Archive)';
-      allBtn.onclick = () => filterByDate('all');
-      container.appendChild(allBtn);
-
-      dates.forEach((d, idx) => {
-        const btn = document.createElement('button');
-        const isLatest = idx === 0;
-        btn.className = `px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${selectedDate === d ? 'bg-indigo-600 text-white font-semibold shadow-sm' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'}`;
-        btn.innerText = isLatest ? `✨ วันนี้ (${d.replace(' 2026', '')})` : d.replace(' 2026', '');
-        btn.onclick = () => filterByDate(d);
-        container.appendChild(btn);
-      });
-    }
-
-    function filterByDate(d) {
-      selectedDate = d;
-      document.getElementById('activeDateLabel').innerText = d === 'all' ? 'แสดงข่าวทั้งหมดในคลัง' : `แสดงข่าว: ${d}`;
-      renderDatePills();
-      renderFeed();
-    }
 
     function switchTab(tab) {
       currentTab = tab;
       const tabAi = document.getElementById('tabAi');
       const tabStock = document.getElementById('tabStock');
-      const tabWeekly = document.getElementById('tabWeekly');
-
-      const aiSummary = document.getElementById('aiSummaryBox');
-      const stockSummary = document.getElementById('stockSummaryBox');
-      const weeklySection = document.getElementById('weeklySection');
-      const dateFilter = document.getElementById('dateFilterSection');
-      const feedContainer = document.getElementById('feedContainer');
-
-      [tabAi, tabStock, tabWeekly].forEach(b => {
-        b.className = "py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50";
-      });
-
       if (tab === 'ai') {
-        tabAi.className = "py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-sm";
-        aiSummary.classList.remove('hidden');
-        stockSummary.classList.add('hidden');
-        weeklySection.classList.add('hidden');
-        dateFilter.classList.remove('hidden');
-        feedContainer.classList.remove('hidden');
-      } else if (tab === 'stock') {
-        tabStock.className = "py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-sm";
-        stockSummary.classList.remove('hidden');
-        aiSummary.classList.add('hidden');
-        weeklySection.classList.add('hidden');
-        dateFilter.classList.add('hidden');
-        feedContainer.classList.remove('hidden');
-      } else if (tab === 'weekly') {
-        tabWeekly.className = "py-2 rounded-xl font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 bg-purple-600 text-white shadow-sm";
-        weeklySection.classList.remove('hidden');
-        aiSummary.classList.add('hidden');
-        stockSummary.classList.add('hidden');
-        dateFilter.classList.add('hidden');
-        feedContainer.classList.add('hidden');
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
+      } else {
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm";
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
       }
       renderFeed();
     }
 
     function renderFeed() {
-      if (currentTab === 'weekly') return;
-
       const container = document.getElementById('feedContainer');
-      const empty = document.getElementById('emptyState');
       container.innerHTML = '';
-
-      let items = allData.filter(item => item.type === currentTab);
-
-      if (currentTab === 'ai' && selectedDate !== 'all') {
-        items = items.filter(item => item.date === selectedDate);
-      }
+      const items = allData.filter(item => item.type === currentTab);
 
       if (items.length === 0) {
-        empty.classList.remove('hidden');
-      } else {
-        empty.classList.add('hidden');
-        items.forEach(item => {
-          const card = document.createElement('article');
-          card.className = "p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition shadow-sm flex flex-col gap-3.5";
-
-          const badgeColor = item.type === 'stock' 
-            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
-            : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
-
-          card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold px-3 py-1 rounded-full border ${badgeColor}">
-                ${item.tag}
-              </span>
-              <span class="text-[11px] text-slate-400 font-light">📅 ${item.date}</span>
-            </div>
-
-            <h3 class="text-base sm:text-lg font-bold text-white leading-snug">
-              ${item.title}
-            </h3>
-
-            <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
-              <div class="flex items-start gap-2">
-                <span class="text-sm">📌</span>
-                <p><strong class="text-white font-medium">เรื่องคือ:</strong> ${item.what}</p>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="text-sm">💡</span>
-                <p><strong class="text-white font-medium">มุมมอง / ประโยชน์:</strong> ${item.benefit}</p>
-              </div>
-            </div>
-
-            <div class="pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-xs">
-              <span class="text-slate-500">แหล่งข้อมูล: ${item.source}</span>
-              <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="font-medium ${item.type === 'stock' ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'} flex items-center gap-1">
-                อ่านรายละเอียดเพิ่มเติม →
-              </a>
-            </div>
-          `;
-          container.appendChild(card);
-        });
+        container.innerHTML = '<div class="text-center py-10 text-slate-500 text-sm">กำลังเชื่อมต่อข้อมูลล่าสุด...</div>';
+        return;
       }
+
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = "p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition shadow-sm flex flex-col gap-3.5";
+        const badgeColor = item.type === 'stock' 
+          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+          : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border ${badgeColor}">
+              ${item.tag}
+            </span>
+            <span class="text-[11px] text-slate-400">${item.date}</span>
+          </div>
+
+          <h3 class="text-base sm:text-lg font-bold text-white leading-snug">
+            ${item.title}
+          </h3>
+
+          <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+            <div class="flex items-start gap-2">
+              <span class="text-sm">📌</span>
+              <p><strong class="text-white font-medium">เรื่องคือ:</strong> ${item.what}</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-sm">💡</span>
+              <p><strong class="text-white font-medium">มุมมอง / ประโยชน์:</strong> ${item.benefit}</p>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-800/60 flex items-center justify-between">
+            <span class="text-[11px] text-slate-500">แหล่งข่าว: ${item.source}</span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium ${item.type === 'stock' ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'} flex items-center gap-1">
+              อ่านเพิ่มเติม →
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     }
 
     async function fetchLiveNews() {
@@ -388,16 +162,16 @@
                 url: c[7] ? c[7].v : '#'
               };
             }).filter(item => item.title && item.title !== 'Title');
+
             if (parsed.length > 0) {
-              allData = parsed.reverse();
-              initLatestDate();
-              renderDatePills();
+              allData = parsed.reverse(); // เรียงข่าวใหม่สุดขึ้นด้านบนเสมอ
+              document.getElementById('currentDateDisplay').innerText = allData[0].date || 'ล่าสุด';
               renderFeed();
             }
           }
         }
       } catch (err) {
-        console.log('Using local fallback:', err);
+        console.error('Fetch error:', err);
       } finally {
         setTimeout(() => { spinner.classList.remove('animate-spin'); }, 500);
       }
