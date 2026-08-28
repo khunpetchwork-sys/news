@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Pulse — ศูนย์รวมข่าว AI, หุ้น & สรุปรายสัปดาห์</title>
+  <title>Daily Pulse — สรุปข่าว AI & ตลาดหุ้น เข้าใจง่าย</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Prompt', 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
+    body {
+      font-family: 'Prompt', 'Inter', sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#0b0f19] text-slate-100 antialiased pb-16">
@@ -21,11 +27,11 @@
         <span class="text-2xl">⚡</span>
         <div>
           <h1 class="text-base font-bold tracking-tight text-white leading-tight">Daily Pulse</h1>
-          <p class="text-[11px] text-slate-400">AI • ตลาดหุ้น • สรุปรายสัปดาห์</p>
+          <p class="text-[11px] text-slate-400">สรุปข่าว AI & พอร์ตหุ้น ภาษาคน</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="fetchCurrentTab()" class="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs flex items-center gap-1.5" title="รีเฟรชข้อมูล">
+        <button onclick="fetchLiveNews()" class="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs flex items-center gap-1.5" title="รีเฟรชข้อมูลล่าสุด">
           <span id="refreshSpinner">🔄</span>
           <span class="text-[11px] font-medium hidden sm:inline">รีเฟรช</span>
         </button>
@@ -40,196 +46,144 @@
   <!-- Main Container -->
   <main class="max-w-2xl mx-auto px-5 pt-6 sm:pt-8">
 
-    <!-- 3-Tab Selector -->
-    <div class="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6 text-xs sm:text-sm">
-      <button id="tabBtn-ai" onclick="switchTab('ai')" class="py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-sm">
-        <span>🤖 ข่าว AI</span>
+    <!-- Tab Selector -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
+      <button id="tabAi" onclick="switchTab('ai')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+        <span>🤖 ข่าว AI ประจำวัน</span>
       </button>
-      <button id="tabBtn-stock" onclick="switchTab('stock')" class="py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
-        <span>📈 ข่าวหุ้น</span>
-      </button>
-      <button id="tabBtn-weekly" onclick="switchTab('weekly')" class="py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
-        <span>📓 สรุปสัปดาห์</span>
+      <button id="tabStock" onclick="switchTab('stock')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50">
+        <span>📈 ตลาดหุ้น & พอร์ต</span>
       </button>
     </div>
 
     <!-- Feed Container -->
-    <div class="space-y-5" id="feedContainer">
-      <div class="text-center py-12 text-slate-500 text-sm">กำลังโหลดข้อมูลสดจากชีต...</div>
-    </div>
+    <div class="space-y-5" id="feedContainer"></div>
 
   </main>
 
   <footer class="mt-12 text-center text-xs text-slate-500">
-    <p>Daily Pulse • แยกชีต AI, หุ้น และสรุปรายสัปดาห์เรียบร้อย</p>
+    <p>Daily Pulse • ดึงข้อมูลสดอัตโนมัติจาก Google Sheets</p>
   </footer>
 
   <script>
     const SPREADSHEET_ID = '1l4JjYvBros8t8UaVxTpmeMou4WsiwoOJmcvkX_BW0u8';
-    
-    const TAB_CONFIG = {
-      ai: {
-        sheetName: 'ข่าว AI',
-        btnId: 'tabBtn-ai',
-        activeClass: 'bg-indigo-600 text-white shadow-sm',
-        badgeColor: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
-      },
-      stock: {
-        sheetName: 'ข่าวหุ้น',
-        btnId: 'tabBtn-stock',
-        activeClass: 'bg-emerald-600 text-white shadow-sm',
-        badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-      },
-      weekly: {
-        sheetName: 'ข่าวสรุปรายสัปดาห์',
-        btnId: 'tabBtn-weekly',
-        activeClass: 'bg-purple-600 text-white shadow-sm',
-        badgeColor: 'bg-purple-500/10 text-purple-300 border-purple-500/20'
-      }
-    };
+    const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
 
+    let allData = [];
     let currentTab = 'ai';
-    let cachedData = { ai: [], stock: [], weekly: [] };
 
     document.addEventListener('DOMContentLoaded', () => {
-      fetchCurrentTab();
+      fetchLiveNews();
     });
 
-    function switchTab(tabKey) {
-      currentTab = tabKey;
-      
-      Object.keys(TAB_CONFIG).forEach(key => {
-        const btn = document.getElementById(TAB_CONFIG[key].btnId);
-        if (key === tabKey) {
-          btn.className = `py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-1.5 ${TAB_CONFIG[key].activeClass}`;
-        } else {
-          btn.className = "py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50";
-        }
-      });
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabAi = document.getElementById('tabAi');
+      const tabStock = document.getElementById('tabStock');
 
-      if (cachedData[tabKey].length > 0) {
-        renderFeed(cachedData[tabKey]);
+      if (tab === 'ai') {
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm";
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
       } else {
-        fetchCurrentTab();
+        tabStock.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm";
+        tabAi.className = "py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50";
       }
+      renderFeed();
     }
 
-    function renderFeed(items) {
+    function renderFeed() {
       const container = document.getElementById('feedContainer');
       container.innerHTML = '';
 
-      if (!items || items.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">ไม่พบข้อมูลในชีตนี้</div>';
+      const items = allData.filter(item => item.type === currentTab);
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 text-slate-500 text-sm">กำลังโหลดข้อมูลล่าสุดจากฐานข้อมูล...</div>';
         return;
       }
-
-      const config = TAB_CONFIG[currentTab];
 
       items.forEach(item => {
         const card = document.createElement('article');
         card.className = "p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800/90 hover:border-slate-700 transition shadow-sm flex flex-col gap-3.5";
 
-        if (currentTab === 'weekly') {
-          card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold px-3 py-1 rounded-full border ${config.badgeColor}">
-                ${item.tag}
-              </span>
-              <span class="text-[11px] text-slate-400">${item.date}</span>
-            </div>
-            <h3 class="text-base sm:text-lg font-bold text-white leading-snug">${item.title}</h3>
-            <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
-              <div class="p-3.5 rounded-2xl bg-slate-800/40 border border-slate-800 text-slate-300">
-                <strong class="text-white block mb-1">📋 สรุปภาพรวม:</strong>
-                ${item.what}
-              </div>
-              <div class="p-3.5 rounded-2xl bg-purple-950/20 border border-purple-800/30 text-purple-200">
-                <strong class="text-white block mb-1">💡 ประเด็นสำคัญ:</strong>
-                ${item.benefit}
-              </div>
-            </div>
-            ${item.url && item.url !== '#' ? `
-            <div class="pt-2.5 border-t border-slate-800/60 flex justify-end">
-              <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-purple-400 hover:text-purple-300 flex items-center gap-1">
-                เปิดสมุดบันทึก NotebookLM →
-              </a>
-            </div>` : ''}
-          `;
-        } else {
-          card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold px-3 py-1 rounded-full border ${config.badgeColor}">
-                ${item.tag}
-              </span>
-              <span class="text-[11px] text-slate-400">${item.date}</span>
-            </div>
-            <h3 class="text-base sm:text-lg font-bold text-white leading-snug">${item.title}</h3>
-            <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
-              <div class="flex items-start gap-2">
-                <span class="text-sm">📌</span>
-                <p><strong class="text-white font-medium">เรื่องคือ:</strong> ${item.what}</p>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="text-sm">💡</span>
-                <p><strong class="text-white font-medium">มุมมอง / ประโยชน์:</strong> ${item.benefit}</p>
-              </div>
-            </div>
-            <div class="pt-2.5 border-t border-slate-800/60 flex items-center justify-between">
-              <span class="text-[11px] text-slate-500">แหล่งข่าว: ${item.source}</span>
-              <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium ${currentTab === 'stock' ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'} flex items-center gap-1">
-                อ่านเพิ่มเติม →
-              </a>
-            </div>
-          `;
-        }
+        const badgeColor = item.type === 'stock' 
+          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+          : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
 
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border ${badgeColor}">
+              ${item.tag}
+            </span>
+            <span class="text-[11px] text-slate-400">${item.date}</span>
+          </div>
+
+          <h3 class="text-base sm:text-lg font-bold text-white leading-snug">
+            ${item.title}
+          </h3>
+
+          <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+            <div class="flex items-start gap-2">
+              <span class="text-sm">📌</span>
+              <p><strong class="text-white font-medium">เรื่องคือ:</strong> ${item.what}</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-sm">💡</span>
+              <p><strong class="text-white font-medium">มุมมอง / ประโยชน์:</strong> ${item.benefit}</p>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-800/60 flex items-center justify-between">
+            <span class="text-[11px] text-slate-500">แหล่งข่าว: ${item.source}</span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium ${item.type === 'stock' ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'} flex items-center gap-1">
+              อ่านเพิ่มเติม →
+            </a>
+          </div>
+        `;
         container.appendChild(card);
       });
     }
 
-    async function fetchCurrentTab() {
+    async function fetchLiveNews() {
       const spinner = document.getElementById('refreshSpinner');
       spinner.classList.add('animate-spin');
-      
-      const config = TAB_CONFIG[currentTab];
-      const encodedSheet = encodeURIComponent(config.sheetName);
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodedSheet}`;
-
       try {
-        const response = await fetch(url);
+        const response = await fetch(GVIZ_URL);
         const text = await response.text();
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-        
         if (jsonMatch && jsonMatch) {
           const data = JSON.parse(jsonMatch);
           const rows = data.table.rows;
-          
           if (rows && rows.length > 0) {
             const parsed = rows.map((r, index) => {
               const c = r.c;
+              const cat = c[2] ? c[2].v : '';
+              const isStock = cat.includes('ตลาดหุ้น') || cat.includes('พอร์ต') || cat.includes('หุ้น') || cat.includes('ทองคำ');
               return {
                 id: c[0] ? c[0].v : (index + 1),
                 date: c ? c.v : '',
-                tag: c[2] ? c[2].v : 'อัปเดต',
+                type: isStock ? 'stock' : 'ai',
+                tag: isStock ? (c[3] ? c[3].v.split(':')[0] : 'การลงทุน') : (c[2] ? c[2].v : 'AI News'),
                 title: c[3] ? c[3].v : '',
                 what: c[4] ? c[4].v : '',
                 benefit: c[5] ? c[5].v : '',
                 source: c[6] ? c[6].v : 'แหล่งข่าว',
                 url: c[7] ? c[7].v : '#'
               };
-            }).filter(item => item.title && item.title !== 'Title' && item.title !== 'หัวข้อข่าว');
+            }).filter(item => item.title && item.title !== 'Title');
 
-            cachedData[currentTab] = parsed.reverse();
-            if (cachedData[currentTab].length > 0) {
-              document.getElementById('currentDateDisplay').innerText = cachedData[currentTab][0].date || 'ล่าสุด';
+            if (parsed.length > 0) {
+              // เรียงลำดับจากใหม่สุดไปเก่าสุด ข่าวล่าสุดของวันนี้จะขึ้นมาอยู่บนสุดเสมอ
+              allData = parsed.reverse();
+              document.getElementById('currentDateDisplay').innerText = allData[0].date || 'ล่าสุด';
+              renderFeed();
             }
-            renderFeed(cachedData[currentTab]);
           }
         }
       } catch (err) {
         console.error('Fetch error:', err);
       } finally {
-        setTimeout(() => { spinner.classList.remove('animate-spin'); }, 400);
+        setTimeout(() => { spinner.classList.remove('animate-spin'); }, 500);
       }
     }
   </script>
