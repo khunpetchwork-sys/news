@@ -4,18 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daily Pulse — สรุปข่าว AI & ตลาดหุ้น เข้าใจง่าย</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Prompt & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Prompt', 'Inter', sans-serif;
-      background-color: #0b0f19;
-      color: #f8fafc;
-    }
+    body { font-family: 'Prompt', 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
   </style>
 </head>
 <body class="min-h-screen bg-[#0b0f19] text-slate-100 antialiased pb-16">
@@ -45,7 +39,6 @@
 
   <!-- Main Container -->
   <main class="max-w-2xl mx-auto px-5 pt-6 sm:pt-8">
-
     <!-- Tab Selector -->
     <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
       <button id="tabAi" onclick="switchTab('ai')" class="py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
@@ -57,12 +50,16 @@
     </div>
 
     <!-- Feed Container -->
-    <div class="space-y-5" id="feedContainer"></div>
-
+    <div class="space-y-5" id="feedContainer">
+      <div class="text-center py-12 text-slate-500 text-sm flex flex-col items-center justify-center gap-3">
+        <span class="text-2xl animate-spin">🔄</span>
+        <span>กำลังดึงข้อมูลสดจากฐานข้อมูล...</span>
+      </div>
+    </div>
   </main>
 
   <footer class="mt-12 text-center text-xs text-slate-500">
-    <p>Daily Pulse • ดึงข้อมูลสดอัตโนมัติจาก Google Sheets</p>
+    <p>Daily Pulse • ดึงข้อมูลสดจาก Google Sheets อัตโนมัติ</p>
   </footer>
 
   <script>
@@ -98,7 +95,7 @@
       const items = allData.filter(item => item.type === currentTab);
 
       if (items.length === 0) {
-        container.innerHTML = '<div class="text-center py-10 text-slate-500 text-sm">กำลังโหลดข้อมูลล่าสุดจากฐานข้อมูล...</div>';
+        container.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">ไม่พบรายการข้อมูลในหมวดนี้</div>';
         return;
       }
 
@@ -151,29 +148,37 @@
         const response = await fetch(GVIZ_URL);
         const text = await response.text();
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+        
         if (jsonMatch && jsonMatch) {
           const data = JSON.parse(jsonMatch);
           const rows = data.table.rows;
           if (rows && rows.length > 0) {
             const parsed = rows.map((r, index) => {
               const c = r.c;
-              const cat = c[2] ? c[2].v : '';
+              const cat = (c && c[2] && c[2].v) ? String(c[2].v) : '';
               const isStock = cat.includes('ตลาดหุ้น') || cat.includes('พอร์ต') || cat.includes('หุ้น') || cat.includes('ทองคำ');
+              
+              const titleVal = (c && c[3] && c[3].v) ? String(c[3].v) : '';
+              let tagVal = cat;
+              if (isStock && titleVal.includes(':')) {
+                tagVal = titleVal.split(':')[0].trim();
+              }
+
               return {
-                id: c[0] ? c[0].v : (index + 1),
-                date: c ? c.v : '',
+                id: (c && c[0] && c[0].v) ? c[0].v : (index + 1),
+                date: (c && c && c.v) ? String(c.v) : '',
                 type: isStock ? 'stock' : 'ai',
-                tag: isStock ? (c[3] ? c[3].v.split(':')[0] : 'การลงทุน') : (c[2] ? c[2].v : 'AI News'),
-                title: c[3] ? c[3].v : '',
-                what: c[4] ? c[4].v : '',
-                benefit: c[5] ? c[5].v : '',
-                source: c[6] ? c[6].v : 'แหล่งข่าว',
-                url: c[7] ? c[7].v : '#'
+                tag: tagVal || (isStock ? 'การลงทุน' : 'AI News'),
+                title: titleVal,
+                what: (c && c[4] && c[4].v) ? String(c[4].v) : '',
+                benefit: (c && c[5] && c[5].v) ? String(c[5].v) : '',
+                source: (c && c[6] && c[6].v) ? String(c[6].v) : 'แหล่งข่าว',
+                url: (c && c[7] && c[7].v) ? String(c[7].v) : '#'
               };
-            }).filter(item => item.title && item.title !== 'Title');
+            }).filter(item => item.title && item.title !== 'Title' && item.title !== 'หัวข้อ');
 
             if (parsed.length > 0) {
-              // เรียงลำดับจากใหม่สุดไปเก่าสุด ข่าวล่าสุดของวันนี้จะขึ้นมาอยู่บนสุดเสมอ
+              // เรียงจากใหม่สุดไปเก่าสุด ข่าวของวันนี้จะอยู่บนสุดเสมอ
               allData = parsed.reverse();
               document.getElementById('currentDateDisplay').innerText = allData[0].date || 'ล่าสุด';
               renderFeed();
@@ -182,6 +187,7 @@
         }
       } catch (err) {
         console.error('Fetch error:', err);
+        document.getElementById('feedContainer').innerHTML = '<div class="text-center py-12 text-red-400 text-sm">ไม่สามารถโหลดข้อมูลได้ กรุณากดปุ่มรีเฟรชอีกครั้ง</div>';
       } finally {
         setTimeout(() => { spinner.classList.remove('animate-spin'); }, 500);
       }
